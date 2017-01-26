@@ -1,7 +1,7 @@
 package org.usfirst.frc.team5679.robot;
 
-import com.ni.vision.NIVision;
-import com.ni.vision.NIVision.RawData;
+//import com.ni.vision.NIVision;
+//import com.ni.vision.NIVision.RawData;
 
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.vision.USBCamera;
+//import edu.wpi.first.wpilibj.vision.USBCamera;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -42,18 +42,18 @@ public class Robot extends IterativeRobot {
 	Encoder rightEncoder = new Encoder(3, 4, false, EncodingType.k4X);
 	int fps = 10;
 	Encoder leftEncoder = new Encoder(1, 2, false, EncodingType.k4X);
-	NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
+//	NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
 	CameraServer camera;
 	//Image frame;
 	int session;
-	RawData colorTable;
+//	RawData colorTable;
 	private int autonomousMode = 0; // initialize default mode
 	SendableChooser autoChooser;
 	String cameraDesc = "Front";
 	
 	private String cameraName = "cam0";
-	USBCamera targetCam = new USBCamera(cameraName);
-	NIVision.Image frame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
+//	USBCamera targetCam = new USBCamera(cameraName);
+//	NIVision.Image frame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
 	
 	static final double startingAngle = 0;
 	static final double Kp = .02;
@@ -109,14 +109,14 @@ public class Robot extends IterativeRobot {
 ////		 interface
 //		 camera.startAutomaticCapture("cam0");
 		 
-		 targetCam.openCamera();
-		 targetCam.startCapture();		 
-
-		targetCam.setFPS(fps);
-		targetCam.getImage(frame);
-		//targetCam.setBrightness(brightness);
-		
-		CameraServer.getInstance().setQuality(imageQuality);
+//		 targetCam.openCamera();
+//		 targetCam.startCapture();		 
+//
+//		targetCam.setFPS(fps);
+//		targetCam.getImage(frame);
+//		//targetCam.setBrightness(brightness);
+//		
+//		CameraServer.getInstance().setQuality(imageQuality);
 	}
 
 	/**
@@ -222,12 +222,12 @@ public class Robot extends IterativeRobot {
 
 		SmartDashboard.putString("Camera", cameraDesc);
 		
-		targetCam.stopCapture();
-		targetCam.closeCamera();
-		
-		targetCam = new USBCamera(cameraName);
-		targetCam.openCamera();
-		targetCam.startCapture();
+//		targetCam.stopCapture();
+//		targetCam.closeCamera();
+//		
+//		targetCam = new USBCamera(cameraName);
+//		targetCam.openCamera();
+//		targetCam.startCapture();
 	}
 
 	/**
@@ -334,8 +334,8 @@ public class Robot extends IterativeRobot {
 		// Added during state competition to decrease number of times images are saved
 		// To attempt fixing the field camera issue.
 		if (cameraCount % cameraAttempts == 0) {
-			targetCam.getImage(frame);
-			CameraServer.getInstance().setImage(frame);
+//			targetCam.getImage(frame);
+//			CameraServer.getInstance().setImage(frame);
 		}
 		
 		cameraCount++;
