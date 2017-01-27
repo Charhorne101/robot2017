@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 //import edu.wpi.first.wpilibj.vision.USBCamera;
 
 /**
@@ -364,34 +363,5 @@ public class Robot extends IterativeRobot {
 	public void setRobotDriveSpeed(RobotDrive driveTrain, double leftSpeed,
 			double rightSpeed) {
 		driveTrain.tankDrive(leftSpeed * speedFactor, rightSpeed * speedFactor);
-	}
-	
-	
-	public void rotateFiringArm(double speed){
-		throw new NotImplementedException();
-	}
-	
-	public void rotateWaterWheel (double speed){
-		throw new NotImplementedException();
-	}
-	
-	public void zoomOut(int range) {
-		throw new NotImplementedException();
-	}
-	
-	public void zoomIn(int range){
-		throw new NotImplementedException();
-	}
-	
-	public void turnOnCamera(){
-		throw new NotImplementedException();
-	}
-	
-	public void turnOffCamera(){
-		throw new NotImplementedException();
-	}
-	
-	public void turnServo(int angle){
-		throw new NotImplementedException();
 	}
 }
