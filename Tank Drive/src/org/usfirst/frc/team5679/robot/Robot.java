@@ -49,7 +49,7 @@ public class Robot extends IterativeRobot {
 	int session;
 //	RawData colorTable;
 	private int autonomousMode = 0; // initialize default mode
-	SendableChooser autoChooser;
+	SendableChooser<Integer> autoChooser;
 	String cameraDesc = "Front";
 	
 	private String cameraName = "cam0";
@@ -97,7 +97,7 @@ public class Robot extends IterativeRobot {
 		rightEncoder.reset();
 		leftEncoder.reset();
 		
-		autoChooser = new SendableChooser();
+		autoChooser = new SendableChooser<Integer>();
 		autoChooser.addDefault("Drive", 0);
 		autoChooser.addObject("Drive and Fire", 1);
 		SmartDashboard.putData("Autonomous mode chooser", autoChooser);
