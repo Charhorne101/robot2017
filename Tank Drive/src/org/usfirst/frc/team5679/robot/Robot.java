@@ -160,7 +160,7 @@ public class Robot extends IterativeRobot {
 						startTime = System.currentTimeMillis();
 						break;
 					case 1:
-						nextStep = fire();
+						nextStep = rotateFiringArm(speed);
 						break;
 				}
 	
@@ -199,16 +199,6 @@ public class Robot extends IterativeRobot {
 			drive.tankDrive(speed, speed * driveOffset);
 			return false;
 		}
-	}
-	
-	/**
-	 * This function is for firing the boulder for a given amount of time. Returns
-	 * a boolean indicating whether the movement is complete.
-	 */
-	public boolean fire() {
-		setVictorSpeed(victorsBeltLeft, -fullSpeed);
-		setVictorSpeed(victorsBeltRight, fullSpeed);
-		return true;
 	}
 	
 	public void changeCamera() {
@@ -366,9 +356,16 @@ public class Robot extends IterativeRobot {
 		driveTrain.tankDrive(leftSpeed * speedFactor, rightSpeed * speedFactor);
 	}
 	
-	
-	public void rotateFiringArm(double speed){
-		throw new NotImplementedException();
+
+	/**
+	 * This method rotates the firing arm
+	 * robot Tank Drive
+	 * 
+	 * @param speed
+	 */
+	public boolean rotateFiringArm(double speed){
+		setVictorSpeed(victorsBeltRight, speed);
+		return true;
 	}
 	
 	public void rotateWaterWheel (double speed){
