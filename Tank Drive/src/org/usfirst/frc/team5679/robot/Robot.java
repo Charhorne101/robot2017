@@ -32,7 +32,7 @@ public class Robot extends IterativeRobot {
 	Victor rightMotor0 = new Victor(2);
 	Victor rightMotor1 = new Victor(3);
 	Victor victorsBeltLeft = new Victor(4);
-	Victor victorsBeltRight = new Victor(5);
+	Victor victorsFiringArm = new Victor(5);
 	Joystick driveJoystick = new Joystick(0);
 	Joystick firingJoystick = new Joystick(1);
 	RobotDrive drive = new RobotDrive(leftMotor0, leftMotor1, rightMotor0,
@@ -305,20 +305,20 @@ public class Robot extends IterativeRobot {
 				
 		if (fireButton && !intakeButton) {
 			setVictorSpeed(victorsBeltLeft, -fullSpeed);
-			setVictorSpeed(victorsBeltRight, fullSpeed);
+			setVictorSpeed(victorsFiringArm, fullSpeed);
 			//SmartDashboard.putBoolean("Captured", false);
 		} else if (intakeButton && !fireButton) { 
 			if (firingLimitSwitch.get()){
 				setVictorSpeed(victorsBeltLeft, fullSpeed);
-				setVictorSpeed(victorsBeltRight, -fullSpeed);	
+				setVictorSpeed(victorsFiringArm, -fullSpeed);	
 			} else {
 				setVictorSpeed(victorsBeltLeft, 0);
-				setVictorSpeed(victorsBeltRight, 0);
+				setVictorSpeed(victorsFiringArm, 0);
 				//SmartDashboard.putBoolean("Captured", true);	
 			}
 		} else {
 			setVictorSpeed(victorsBeltLeft, 0);
-			setVictorSpeed(victorsBeltRight, 0);
+			setVictorSpeed(victorsFiringArm, 0);
 			//SmartDashboard.putBoolean("Captured", true);	
 		}
 		 
@@ -364,7 +364,7 @@ public class Robot extends IterativeRobot {
 	 * @param speed
 	 */
 	public boolean rotateFiringArm(double speed){
-		setVictorSpeed(victorsBeltRight, speed);
+		setVictorSpeed(victorsFiringArm, speed);
 		return true;
 	}
 	
