@@ -9,7 +9,8 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -23,12 +24,12 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
  */
 
 public class Robot extends IterativeRobot {
-	Victor leftMotor0 = new Victor(0);
-	Victor leftMotor1 = new Victor(1);
-	Victor rightMotor0 = new Victor(2);
-	Victor rightMotor1 = new Victor(3);
-	Victor victorsBeltLeft = new Victor(4);
-	Victor victorsFiringArm = new Victor(5);
+	Talon leftMotor0 = new Talon(0);
+	Talon leftMotor1 = new Talon(1);
+	Talon rightMotor0 = new Talon(2);
+	Talon rightMotor1 = new Talon(3);
+	Talon victorsBeltLeft = new Talon(4);
+	Talon victorsFiringArm = new Talon(5);
 	Joystick driveJoystick = new Joystick(0);
 	Joystick firingJoystick = new Joystick(1);
 	RobotDrive drive = new RobotDrive(leftMotor0, leftMotor1, rightMotor0,
@@ -201,12 +202,12 @@ public class Robot extends IterativeRobot {
 
 	/**
 	 * This method sets the speed and applies the limiting speed factor for
-	 * Victors
+	 * Talons
 	 * 
 	 * @param motor
 	 * @param speed
 	 */
-	public void setVictorSpeed(Victor motor, double speed) {
+	public void setTalonSpeed(Talon motor, double speed) {
 		motor.set(speed * speedFactor);
 	}
 
@@ -230,7 +231,7 @@ public class Robot extends IterativeRobot {
 	 * @param speed
 	 */
 	public boolean rotateFiringArm(double speed){
-		setVictorSpeed(victorsFiringArm, speed);
+		setTalonSpeed(victorsFiringArm, speed);
 		return true;
 	}
 	
