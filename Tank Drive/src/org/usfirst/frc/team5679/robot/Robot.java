@@ -1,8 +1,5 @@
 package org.usfirst.frc.team5679.robot;
 
-//import com.ni.vision.NIVision;
-//import com.ni.vision.NIVision.RawData;
-
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.CameraServer;
@@ -16,7 +13,6 @@ import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-//import edu.wpi.first.wpilibj.vision.USBCamera;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -43,19 +39,15 @@ public class Robot extends IterativeRobot {
 	Encoder rightEncoder = new Encoder(3, 4, false, EncodingType.k4X);
 	int fps = 10;
 	Encoder leftEncoder = new Encoder(1, 2, false, EncodingType.k4X);
-//	NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
+
 	CameraServer camera;
-	//Image frame;
 	int session;
-//	RawData colorTable;
-	private int autonomousMode = 0; // initialize default mode
+	// initialize default mode
+	private int autonomousMode = 0; 
 	SendableChooser<Integer> autoChooser;
 	String cameraDesc = "Front";
 	
 	private String cameraName = "cam0";
-//	USBCamera targetCam = new USBCamera(cameraName);
-//	NIVision.Image frame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
-	
 	static final double startingAngle = 0;
 	static final double Kp = .02;
 	static final double speedFactor = 1;
@@ -102,22 +94,6 @@ public class Robot extends IterativeRobot {
 		autoChooser.addObject("Drive and Fire", 1);
 		SmartDashboard.putData("Autonomous mode chooser", autoChooser);
 		SmartDashboard.putString("Camera", cameraDesc);
-		//SmartDashboard.putBoolean("Captured", !firingLimitSwitch.get());
-
-//		 camera = CameraServer.getInstance();
-//		 camera.setQuality(30);
-////		 the camera name (ex "cam0") can be found through the roborio web
-////		 interface
-//		 camera.startAutomaticCapture("cam0");
-		 
-//		 targetCam.openCamera();
-//		 targetCam.startCapture();		 
-//
-//		targetCam.setFPS(fps);
-//		targetCam.getImage(frame);
-//		//targetCam.setBrightness(brightness);
-//		
-//		CameraServer.getInstance().setQuality(imageQuality);
 	}
 
 	/**
@@ -128,12 +104,7 @@ public class Robot extends IterativeRobot {
 		rightEncoder.reset();
 		leftEncoder.reset();
 		SmartDashboard.putString("autonomous init", "autonomous init");
-//		gyro.reset();
-//		gyro.setSensitivity(.007);
-//		gyro.setPIDSourceType(PIDSourceType.kRate);
 		stepToPerform = 0;
-//		autonomousCommand = (Command) autoChooser.getSelected();
-//		autonomousCommand.start();
 	}
 
 	/**
@@ -158,9 +129,6 @@ public class Robot extends IterativeRobot {
 						// adjust the first number in the movebase call for number of feet to move in autonomous
 						nextStep = moveBase(distance, speed, 0);
 						startTime = System.currentTimeMillis();
-						break;
-					case 1:
-						nextStep = rotateFiringArm(speed);
 						break;
 				}
 	
@@ -200,71 +168,6 @@ public class Robot extends IterativeRobot {
 			return false;
 		}
 	}
-	
-	public void changeCamera() {
-		if (cameraName == "cam0") {
-			cameraName = "cam4";
-			cameraDesc = "Back";
-		}
-		else {
-			cameraName = "cam0";
-			cameraDesc = "Front";
-		}
-
-		SmartDashboard.putString("Camera", cameraDesc);
-		
-//		targetCam.stopCapture();
-//		targetCam.closeCamera();
-//		
-//		targetCam = new USBCamera(cameraName);
-//		targetCam.openCamera();
-//		targetCam.startCapture();
-	}
-
-	/**
-	 * This function is for turning the base at a given speed and angle. Returns
-	 * a boolean indicating whether the movement is complete.
-	 */
-	public boolean turnBase(double speed, double desiredAngle) {
-		double currentAngle = gyro.getAngle();
-		double angleDifference = currentAngle - startingAngle;
-		if ((angleDifference > 0 && angleDifference <= desiredAngle)
-				|| (angleDifference < 0 && angleDifference >= desiredAngle)) {
-			drive.tankDrive(speed, -speed * driveOffset);
-			return false;
-		} else {
-			drive.tankDrive(0, 0);
-			;
-			return true;
-		}
-	}
-
-	/**
-	 * grab an image, draw the circle, and provide it for the camera server
-	 * which will in turn send it to the dashboard.
-	 */
-	public void operatorControl() {
-//		NIVision.IMAQdxStartAcquisition(session);
-//
-//		while (isOperatorControl() && isEnabled()) {
-//
-//			NIVision.IMAQdxGrab(session, frame, 1);
-//			NIVision.imaqDrawShapeOnImage(frame, frame, rect,
-//					DrawMode.DRAW_VALUE, ShapeMode.SHAPE_OVAL, 0.0f);
-//
-//			CameraServer.getInstance().setImage(frame);
-//
-////			if (snapshotButton) {
-////				NIVision.imaqWriteJPEGFile(frame, imageFileName, imageQuality,
-////						colorTable);
-////			}
-//
-//			/** robot code here! **/
-//			Timer.delay(0.005); // wait for a motor update time
-//		}
-//		NIVision.IMAQdxStopAcquisition(session);
-		
-	}
 
 	/**
 	 * This function is called periodically during operator control
@@ -302,34 +205,6 @@ public class Robot extends IterativeRobot {
 		}
 		
 		setRobotDriveSpeed(drive, LP * speedAdjust, RP * speedAdjust);
-				
-		if (fireButton && !intakeButton) {
-			setVictorSpeed(victorsBeltLeft, -fullSpeed);
-			setVictorSpeed(victorsFiringArm, fullSpeed);
-			//SmartDashboard.putBoolean("Captured", false);
-		} else if (intakeButton && !fireButton) { 
-			if (firingLimitSwitch.get()){
-				setVictorSpeed(victorsBeltLeft, fullSpeed);
-				setVictorSpeed(victorsFiringArm, -fullSpeed);	
-			} else {
-				setVictorSpeed(victorsBeltLeft, 0);
-				setVictorSpeed(victorsFiringArm, 0);
-				//SmartDashboard.putBoolean("Captured", true);	
-			}
-		} else {
-			setVictorSpeed(victorsBeltLeft, 0);
-			setVictorSpeed(victorsFiringArm, 0);
-			//SmartDashboard.putBoolean("Captured", true);	
-		}
-		 
-		// Added during state competition to decrease number of times images are saved
-		// To attempt fixing the field camera issue.
-		if (cameraCount % cameraAttempts == 0) {
-//			targetCam.getImage(frame);
-//			CameraServer.getInstance().setImage(frame);
-		}
-		
-		cameraCount++;
 	}
 
 	/**
@@ -355,7 +230,6 @@ public class Robot extends IterativeRobot {
 			double rightSpeed) {
 		driveTrain.tankDrive(leftSpeed * speedFactor, rightSpeed * speedFactor);
 	}
-	
 
 	/**
 	 * This method rotates the firing arm
