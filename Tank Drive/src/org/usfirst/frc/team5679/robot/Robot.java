@@ -47,7 +47,6 @@ public class Robot extends IterativeRobot {
 	SendableChooser<Integer> autoChooser;
 	String cameraDesc = "Front";
 	
-	private String cameraName = "cam0";
 	static final double startingAngle = 0;
 	static final double Kp = .02;
 	static final double speedFactor = 1;
@@ -112,7 +111,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		autonomousMode = (int) autoChooser.getSelected();
+		autonomousMode = autoChooser.getSelected();
 		
 		boolean nextStep = false;
 		int distance = 16;
@@ -178,14 +177,7 @@ public class Robot extends IterativeRobot {
 		leftEncoder.reset();
 		double LP = -driveJoystick.getRawAxis(1);
 		double RP = -driveJoystick.getRawAxis(5);
-		boolean fireButton = firingJoystick.getRawButton(1);
-		boolean intakeButton = firingJoystick.getRawButton(2);
-		boolean cameraButton = driveJoystick.getRawButton(5);
-		
-		if (cameraButton) {
-			//changeCamera();
-		}
-		
+			
 		if (driveJoystick.getRawAxis(3) > minJoystickValue){
 			speedAdjust = fullSpeed;
 		}
