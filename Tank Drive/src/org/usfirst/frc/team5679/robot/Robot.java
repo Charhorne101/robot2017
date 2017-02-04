@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -28,8 +27,8 @@ public class Robot extends IterativeRobot {
 	Talon leftMotor1 = new Talon(1);
 	Talon rightMotor0 = new Talon(2);
 	Talon rightMotor1 = new Talon(3);
-	Talon victorsBeltLeft = new Talon(4);
-	Talon victorsFiringArm = new Talon(5);
+	Talon talonBeltLeft = new Talon(4);
+	Talon talonFiringArm = new Talon(5);
 	Joystick driveJoystick = new Joystick(0);
 	Joystick firingJoystick = new Joystick(1);
 	RobotDrive drive = new RobotDrive(leftMotor0, leftMotor1, rightMotor0,
@@ -233,7 +232,7 @@ public class Robot extends IterativeRobot {
 	 * @param speed
 	 */
 	public boolean rotateFiringArm(double speed){
-		setTalonSpeed(victorsFiringArm, speed);
+		setTalonSpeed(talonFiringArm, speed);
 		return true;
 	}
 	
