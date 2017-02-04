@@ -81,6 +81,8 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
+		CameraServer.getInstance().startAutomaticCapture();
+		
 		rightEncoder.setDistancePerPulse(distancePerPulse);
 		leftEncoder.setDistancePerPulse(distancePerPulse);
 
@@ -244,14 +246,6 @@ public class Robot extends IterativeRobot {
 	}
 	
 	public void zoomIn(int range){
-		throw new NotImplementedException();
-	}
-	
-	public void turnOnCamera(){
-		throw new NotImplementedException();
-	}
-	
-	public void turnOffCamera(){
 		throw new NotImplementedException();
 	}
 	
