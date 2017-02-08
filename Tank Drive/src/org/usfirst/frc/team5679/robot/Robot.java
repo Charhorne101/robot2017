@@ -49,7 +49,7 @@ public class Robot extends IterativeRobot {
 	
 	static final double startingAngle = 0;
 	static final double Kp = .02;
-	static final double speedFactor = 1;
+	static final double speedFactor = .75;
 	static final double firingSpeedFactor = 1;
 	static final double driveOffset = .98;
 	// Adjust this value down for more distance in autonomous, up for less distance
