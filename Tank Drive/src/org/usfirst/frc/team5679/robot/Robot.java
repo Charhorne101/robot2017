@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -29,6 +30,7 @@ public class Robot extends IterativeRobot {
 	Talon rightMotor1 = new Talon(3);
 	Talon talonBeltLeft = new Talon(4);
 	Talon talonFiringArm = new Talon(5);
+	Spark fuelCollectorController = new Spark(6);
 	Joystick driveJoystick = new Joystick(0);
 	Joystick firingJoystick = new Joystick(1);
 	RobotDrive drive = new RobotDrive(leftMotor0, leftMotor1, rightMotor0,
@@ -73,6 +75,7 @@ public class Robot extends IterativeRobot {
 	long fireTime = 5000;
 	int cameraCount = 0;
 	int cameraAttempts = 5;
+
 	
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -237,7 +240,7 @@ public class Robot extends IterativeRobot {
 	}
 	
 	public void rotateWaterWheel (double speed){
-		throw new NotImplementedException();
+		fuelCollectorController.setSpeed(speed);
 	}
 	
 	public void zoomOut(int range) {
