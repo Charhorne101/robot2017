@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
@@ -203,6 +204,11 @@ public class Robot extends IterativeRobot {
 		}
 		
 		setRobotDriveSpeed(drive, LP * speedAdjust, RP * speedAdjust);
+		//@TODO set fuel collector to joystick button
+		if (driveJoystick.getTrigger(GenericHID.Hand.kRight))
+		{
+			rotateWaterWheel(1);
+		}
 	}
 
 	/**
