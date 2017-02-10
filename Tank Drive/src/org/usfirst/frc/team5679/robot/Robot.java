@@ -30,6 +30,7 @@ public class Robot extends IterativeRobot {
 	Talon rightMotor1 = new Talon(3);
 	Talon talonBeltLeft = new Talon(4);
 	Talon talonFiringArm = new Talon(5);
+	// @TODO check spark controller port number
 	Spark fuelCollectorController = new Spark(6);
 	Joystick driveJoystick = new Joystick(0);
 	Joystick firingJoystick = new Joystick(1);
@@ -214,7 +215,10 @@ public class Robot extends IterativeRobot {
 	public void setTalonSpeed(Talon motor, double speed) {
 		motor.set(speed * speedFactor);
 	}
-
+	
+	public void setSparkSpeed(Spark motor, double speed) {
+		motor.set(speed * speedFactor);
+	}
 	/**
 	 * This method sets the speed and applies the limiting speed factor for
 	 * robot Tank Drive
@@ -239,8 +243,14 @@ public class Robot extends IterativeRobot {
 		return true;
 	}
 	
-	public void rotateWaterWheel (double speed){
-		fuelCollectorController.setSpeed(speed);
+	/**
+	 * Sets motor controller speed to specified value
+	 * @param speed must be between 1 and -1 (backwards)
+	 * @return
+	 */
+	public boolean rotateWaterWheel (double speed){
+		setSparkSpeed(fuelCollectorController, speed);
+		return true;
 	}
 	
 	public void zoomOut(int range) {
