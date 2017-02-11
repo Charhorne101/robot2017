@@ -49,7 +49,6 @@ public class Robot extends IterativeRobot {
 	// initialize default mode
 	private int autonomousMode = 0; 
 	SendableChooser<Integer> autoChooser;
-	String cameraDesc = "Front";
 	
 	static final double startingAngle = 0;
 	static final double Kp = .02;
@@ -66,7 +65,7 @@ public class Robot extends IterativeRobot {
 	static final int imageQuality = 20;
 	static final int fullSpeed = 1;
 	static final double firingMaxDistance = 1;
-	static final String imageFileName = "/camera/image.jpg";
+	static final String cameraImageFileName = "/camera/image.jpg";
 
 	double speedAdjust = 1;
 	double previousFireSpeed = 0;
@@ -77,7 +76,13 @@ public class Robot extends IterativeRobot {
 	long fireTime = 5000;
 	int cameraCount = 0;
 	int cameraAttempts = 5;
-
+	final String frontCameraName = "cam0";
+    final String rearCameraName = "cam1"; 
+    String activeCameraName = frontCameraName;
+	final String frontCameraDescription = "Front";
+    final String rearCameraDescription = "Rear"; 
+    String activeCameraDescription = frontCameraDescription;
+    final double waterWheelSpeed = 1;
 	
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -85,7 +90,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		CameraServer.getInstance().startAutomaticCapture();
+		CameraServer.getInstance().startAutomaticCapture(frontCameraName, cameraImageFileName);
 		
 		rightEncoder.setDistancePerPulse(distancePerPulse);
 		leftEncoder.setDistancePerPulse(distancePerPulse);
@@ -99,9 +104,27 @@ public class Robot extends IterativeRobot {
 		autoChooser.addDefault("Drive", 0);
 		autoChooser.addObject("Drive and Fire", 1);
 		SmartDashboard.putData("Autonomous mode chooser", autoChooser);
-		SmartDashboard.putString("Camera", cameraDesc);
+		SmartDashboard.putString("Camera", activeCameraDescription);
 	}
 
+	/**
+	 * This function switches between two cameras.
+	 */
+	public void changeCamera() {
+		if (activeCameraName == frontCameraName) {
+			activeCameraName = rearCameraName;
+			activeCameraDescription = rearCameraDescription;
+		}
+		else {
+			activeCameraName = frontCameraName;
+			activeCameraDescription = frontCameraDescription;
+		}
+
+		SmartDashboard.putString("Camera", activeCameraDescription);
+				
+		CameraServer.getInstance().startAutomaticCapture(activeCameraName, cameraImageFileName);
+	}
+	
 	/**
 	 * This function sets up any necessary data before the autonomous control
 	 * loop.
@@ -207,7 +230,7 @@ public class Robot extends IterativeRobot {
 		//@TODO set fuel collector to joystick button
 		if (driveJoystick.getTrigger(GenericHID.Hand.kRight))
 		{
-			rotateWaterWheel(1);
+			rotateWaterWheel(waterWheelSpeed);
 		}
 	}
 
