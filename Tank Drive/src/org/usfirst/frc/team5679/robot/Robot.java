@@ -12,9 +12,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -29,7 +27,8 @@ public class Robot extends IterativeRobot {
 	Talon leftMotor1 = new Talon(1);
 	Talon rightMotor0 = new Talon(2);
 	Talon rightMotor1 = new Talon(3);
-	Talon talonBeltLeft = new Talon(4);
+	//@TODO check firing controller port
+	Talon fuelFiringController = new Talon(4);
 	Talon talonFiringArm = new Talon(5);
 	// @TODO check spark controller port number
 	Spark fuelCollectorController = new Spark(6);
@@ -37,18 +36,16 @@ public class Robot extends IterativeRobot {
 	Joystick firingJoystick = new Joystick(1);
 	RobotDrive drive = new RobotDrive(leftMotor0, leftMotor1, rightMotor0,
 			rightMotor1);
-	DigitalInput firingLimitSwitch = new DigitalInput(0);
+	DigitalInput releaseFuelLimitSwitch = new DigitalInput(0);
+	DigitalInput closeFuelLimitSwitch = new DigitalInput(1);
 	AnalogGyro gyro = new AnalogGyro(0);
 	BuiltInAccelerometer accel = new BuiltInAccelerometer();
 	Encoder rightEncoder = new Encoder(3, 4, false, EncodingType.k4X);
 	int fps = 10;
 	Encoder leftEncoder = new Encoder(1, 2, false, EncodingType.k4X);
-
+	
 	CameraServer camera;
 	int session;
-	// initialize default mode
-	private int autonomousMode = 0; 
-	SendableChooser<Integer> autoChooser;
 	
 	static final double startingAngle = 0;
 	static final double Kp = .02;
@@ -62,20 +59,11 @@ public class Robot extends IterativeRobot {
 	static final double halfSpeed = .5;
 	static final double minJoystickValue = 0.2;
 	static final double minimumSpeed = 0.1;
-	static final int imageQuality = 20;
 	static final int fullSpeed = 1;
 	static final double firingMaxDistance = 1;
 	static final String cameraImageFileName = "/camera/image.jpg";
 
 	double speedAdjust = 1;
-	double previousFireSpeed = 0;
-	boolean runOnce = true;
-	boolean reverse = false;
-	int stepToPerform = 0;
-	long startTime;
-	long fireTime = 5000;
-	int cameraCount = 0;
-	int cameraAttempts = 5;
 	final String frontCameraName = "cam0";
     final String rearCameraName = "cam1"; 
     String activeCameraName = frontCameraName;
@@ -83,7 +71,20 @@ public class Robot extends IterativeRobot {
     final String rearCameraDescription = "Rear"; 
     String activeCameraDescription = frontCameraDescription;
     final double waterWheelSpeed = 1;
-	
+    final GenericHID.Hand waterWheelButton = GenericHID.Hand.kRight;
+    final int firingJoystickAxis = 0;
+    final int driveJoystickLeftAxis = 1;
+    final int driveJoystickRightAxis = 5;
+    //@TODO: Set firing arm button
+    final int holdFiringArmButton = 2;
+    final int releaseFuelButton = 1;
+    final int closeFuelButton = 3;
+    final int joystickCameraButton = 5;	
+	final int autonomousDistance = 16;
+	final double autonomousSpeed = .7;
+	final double releaseFuelSpeed = 1;
+	final double closeFuelSpeed = 1;
+    	
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
@@ -100,10 +101,6 @@ public class Robot extends IterativeRobot {
 		rightEncoder.reset();
 		leftEncoder.reset();
 		
-		autoChooser = new SendableChooser<Integer>();
-		autoChooser.addDefault("Drive", 0);
-		autoChooser.addObject("Drive and Fire", 1);
-		SmartDashboard.putData("Autonomous mode chooser", autoChooser);
 		SmartDashboard.putString("Camera", activeCameraDescription);
 	}
 
@@ -133,40 +130,14 @@ public class Robot extends IterativeRobot {
 		rightEncoder.reset();
 		leftEncoder.reset();
 		SmartDashboard.putString("autonomous init", "autonomous init");
-		stepToPerform = 0;
 	}
 
 	/**
 	 * This function is called periodically during autonomous control
 	 */
 	@Override
-	public void autonomousPeriodic() {
-		autonomousMode = autoChooser.getSelected();
-		
-		boolean nextStep = false;
-		int distance = 16;
-		double speed = .7;
-		switch (autonomousMode) {
-			// Mode 0, drive
-			case 0:
-				moveBase(distance, speed, 0);
-				break;
-			// Mode 1, Drive and fire
-			case 1: 
-				switch (stepToPerform) {
-					case 0:
-						// adjust the first number in the movebase call for number of feet to move in autonomous
-						nextStep = moveBase(distance, speed, 0);
-						startTime = System.currentTimeMillis();
-						break;
-				}
-	
-				if (nextStep) {
-					stepToPerform++;
-				}
-				
-				break;
-		}
+	public void autonomousPeriodic() {	
+		moveBase(autonomousDistance, autonomousSpeed, 0);
 
 		debug();
 	}
@@ -187,9 +158,10 @@ public class Robot extends IterativeRobot {
 	 * boolean indicating whether the movement is complete.
 	 */
 	public boolean moveBase(double feet, double speed, double angle) {
+		double tankDriveMin = -.2;
 		if (rightEncoder.getDistance() >= feet
 				|| leftEncoder.getDistance() >= feet) {
-			drive.tankDrive(-.2, -.2);
+			drive.tankDrive(tankDriveMin, tankDriveMin);
 			drive.tankDrive(0, 0);
 			return true;
 		} else {
@@ -205,8 +177,8 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		rightEncoder.reset();
 		leftEncoder.reset();
-		double LP = -driveJoystick.getRawAxis(1);
-		double RP = -driveJoystick.getRawAxis(5);
+		double LP = -driveJoystick.getRawAxis(driveJoystickLeftAxis);
+		double RP = -driveJoystick.getRawAxis(driveJoystickRightAxis);
 			
 		if (driveJoystick.getRawAxis(3) > minJoystickValue){
 			speedAdjust = fullSpeed;
@@ -216,8 +188,8 @@ public class Robot extends IterativeRobot {
 		}
 		else {
 			speedAdjust = .85;
-		}
-		
+		}		
+						
 		if (Math.abs(LP) < minimumSpeed) {
 			LP = 0;
 
@@ -227,13 +199,28 @@ public class Robot extends IterativeRobot {
 		}
 		
 		setRobotDriveSpeed(drive, LP * speedAdjust, RP * speedAdjust);
-		//@TODO set fuel collector to joystick button
-		if (driveJoystick.getTrigger(GenericHID.Hand.kRight))
+						
+		if (driveJoystick.getTrigger(waterWheelButton))
 		{
 			rotateWaterWheel(waterWheelSpeed);
+		}		
+
+		if (firingJoystick.getRawButton(releaseFuelButton))
+		{
+			releaseFuel(releaseFuelSpeed);
+		}	
+		if (firingJoystick.getRawButton(closeFuelButton))
+		{
+			closeFuel(closeFuelSpeed);
+		}	
+		
+		boolean cameraButton = driveJoystick.getRawButton(joystickCameraButton);
+		
+		if (cameraButton) {
+			changeCamera();
 		}
 	}
-
+	
 	/**
 	 * This method sets the speed and applies the limiting speed factor for
 	 * Talons
@@ -275,22 +262,50 @@ public class Robot extends IterativeRobot {
 	/**
 	 * Sets motor controller speed to specified value
 	 * @param speed must be between 1 and -1 (backwards)
-	 * @return
 	 */
-	public boolean rotateWaterWheel (double speed){
+	public void rotateWaterWheel (double speed){
 		setSparkSpeed(fuelCollectorController, speed);
-		return true;
+	}
+			
+	/**
+	 * Opens the fuel releaser.
+	 * @param speed must be between 1 and -1 (backwards)
+	 */
+	public void releaseFuel(double speed){
+		rotateFuelRelease(speed);
 	}
 	
-	public void zoomOut(int range) {
-		throw new NotImplementedException();
+	/**
+	 * Sets fuel release motor controller speed to specified value until limit switch is hit
+	 * @param speed must be between 1 and -1 (backwards)
+	 */
+	public void rotateFuelRelease(double speed){
+		if (speed > 0) {
+			if (releaseFuelLimitSwitch.get()){	
+				setTalonSpeed(fuelFiringController, speed);
+			}
+			else {
+				setTalonSpeed(fuelFiringController, 0);			
+			}
+		}
+		else if (speed < 0) {
+			if (closeFuelLimitSwitch.get()){	
+				setTalonSpeed(fuelFiringController, speed);
+			}
+			else {
+				setTalonSpeed(fuelFiringController, 0);			
+			}
+		}
+		else {
+			setTalonSpeed(fuelFiringController, speed);
+		}
 	}
 	
-	public void zoomIn(int range){
-		throw new NotImplementedException();
-	}
-	
-	public void turnServo(int angle){
-		throw new NotImplementedException();
+	/**
+	 * Closes the fuel releaser.
+	 * @param speed must be between 1 and -1 (backwards)
+	 */
+	public void closeFuel(double speed){
+		rotateFuelRelease(-1 * speed);
 	}
 }
