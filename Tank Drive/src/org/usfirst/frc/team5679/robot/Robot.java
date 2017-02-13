@@ -34,8 +34,8 @@ public class Robot extends IterativeRobot {
 	Joystick firingJoystick = new Joystick(1);
 	RobotDrive drive = new RobotDrive(leftMotor0, leftMotor1, rightMotor0, rightMotor1);
 	DigitalInput releaseFuelLimitSwitch = new DigitalInput(0);
-	DigitalInput closeFuelLimitSwitch = new DigitalInput(1);
-	AnalogGyro gyro = new AnalogGyro(0);
+	DigitalInput closeFuelLimitSwitch = new DigitalInput(5);
+	//AnalogGyro gyro = new AnalogGyro(0);
 	BuiltInAccelerometer accel = new BuiltInAccelerometer();
 	Encoder rightEncoder = new Encoder(3, 4, false, EncodingType.k4X);
 	Encoder leftEncoder = new Encoder(1, 2, false, EncodingType.k4X);
@@ -84,7 +84,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		CameraServer.getInstance().startAutomaticCapture(frontCameraName, cameraImageFileName);
+		CameraServer.getInstance().startAutomaticCapture(0);
 
 		rightEncoder.setDistancePerPulse(distancePerPulse);
 		leftEncoder.setDistancePerPulse(distancePerPulse);
