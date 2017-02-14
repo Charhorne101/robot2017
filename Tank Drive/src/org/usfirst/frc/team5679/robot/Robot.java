@@ -280,15 +280,11 @@ public class Robot extends IterativeRobot {
 		return true;
 	}
 	
-	public void zoomOut(int range) {
-		throw new NotImplementedException();
-	}
-	
-	public void zoomIn(int range){
-		throw new NotImplementedException();
-	}
-	
 	public void turnServo(int angle){
+		throw new NotImplementedException();
+	}
+	
+	public void bamboozleCamera(){
 		throw new NotImplementedException();
 	}
 }
