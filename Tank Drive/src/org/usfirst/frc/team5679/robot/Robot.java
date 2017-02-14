@@ -1,5 +1,11 @@
 package org.usfirst.frc.team5679.robot;
 
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
+
+import edu.wpi.cscore.CvSink;
+import edu.wpi.cscore.CvSource;
+import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.CameraServer;
@@ -29,10 +35,10 @@ public class Robot extends IterativeRobot {
 	Talon leftMotor1 = new Talon(1);
 	Talon rightMotor0 = new Talon(2);
 	Talon rightMotor1 = new Talon(3);
-	Talon talonBeltLeft = new Talon(4);
-	Talon talonFiringArm = new Talon(5);
+	//Talon talonBeltLeft = new Talon(4);
+	Talon talonDumpFuel = new Talon(5);
 	// @TODO check spark controller port number
-	Spark fuelCollectorController = new Spark(6);
+	Spark fuelCollectorController = new Spark(4);
 	Joystick driveJoystick = new Joystick(0);
 	Joystick firingJoystick = new Joystick(1);
 	RobotDrive drive = new RobotDrive(leftMotor0, leftMotor1, rightMotor0,
@@ -85,7 +91,22 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		CameraServer.getInstance().startAutomaticCapture();
+		Thread cameraThread=new Thread() {
+			public void run() {
+				UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+				camera.setResolution(640, 480);
+				CvSink cvSink = CameraServer.getInstance().getVideo();
+				CvSource outputStream = CameraServer.getInstance().putVideo("Blur", 640, 480);
+				Mat source = new Mat();
+				Mat output = new Mat();
+				while (!Thread.interrupted()) {
+					cvSink.grabFrame(source);
+					
+					outputStream.putFrame(output);
+				}
+			}
+		};
+		cameraThread.start();
 		
 		rightEncoder.setDistancePerPulse(distancePerPulse);
 		leftEncoder.setDistancePerPulse(distancePerPulse);
@@ -239,13 +260,13 @@ public class Robot extends IterativeRobot {
 	}
 
 	/**
-	 * This method rotates the firing arm
+	 * This method dumps fuel.
 	 * robot Tank Drive
 	 * 
 	 * @param speed
 	 */
-	public boolean rotateFiringArm(double speed){
-		setTalonSpeed(talonFiringArm, speed);
+	public boolean dumpFuel(double speed){
+		setTalonSpeed(talonDumpFuel, speed);
 		return true;
 	}
 	
