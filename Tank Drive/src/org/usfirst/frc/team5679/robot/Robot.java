@@ -69,13 +69,13 @@ public class Robot extends IterativeRobot {
 	static final int joystickCameraButton = 5;
 	static final int autonomousDistance = 16;
 	static final String cameraImageFileName = "/camera/image.jpg";
-	static final String frontCameraName = "cam0";
-	static final String rearCameraName = "cam1";
+	static final int frontCameraName = 0;
+	static final int rearCameraName = 1;
 	static final String frontCameraDescription = "Front";
 	static final String rearCameraDescription = "Rear";
 	static final GenericHID.Hand waterWheelButton = GenericHID.Hand.kRight;
 	static double speedAdjust = 1;
-	String activeCameraName = frontCameraName;
+	int activeCameraName = frontCameraName;
 	String activeCameraDescription = frontCameraDescription;
 
 	/**
@@ -84,7 +84,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		CameraServer.getInstance().startAutomaticCapture(0);
+		CameraServer.getInstance().startAutomaticCapture(frontCameraName);
 
 		rightEncoder.setDistancePerPulse(distancePerPulse);
 		leftEncoder.setDistancePerPulse(distancePerPulse);
@@ -111,7 +111,7 @@ public class Robot extends IterativeRobot {
 
 		SmartDashboard.putString("Camera", activeCameraDescription);
 
-		CameraServer.getInstance().startAutomaticCapture(activeCameraName, cameraImageFileName);
+		CameraServer.getInstance().startAutomaticCapture(activeCameraName);
 	}
 
 	/**
