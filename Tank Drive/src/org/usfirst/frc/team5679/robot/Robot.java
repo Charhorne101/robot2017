@@ -83,7 +83,10 @@ public class Robot extends IterativeRobot {
 	long fireTime = 5000;
 	int cameraCount = 0;
 	int cameraAttempts = 5;
-
+	String frontCamera = "Front Camera";
+	int frontCameraNumber = 0;
+	String activeCamera = frontCamera;
+	int activeCameraNumber = frontCameraNumber;
 	
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -91,22 +94,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		Thread cameraThread=new Thread() {
-			public void run() {
-				UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
-				camera.setResolution(640, 480);
-				CvSink cvSink = CameraServer.getInstance().getVideo();
-				CvSource outputStream = CameraServer.getInstance().putVideo("Blur", 640, 480);
-				Mat source = new Mat();
-				Mat output = new Mat();
-				while (!Thread.interrupted()) {
-					cvSink.grabFrame(source);
-					
-					outputStream.putFrame(output);
-				}
-			}
-		};
-		cameraThread.start();
+		CameraServer.getInstance().startAutomaticCapture(activeCamera, activeCameraNumber);
 		
 		rightEncoder.setDistancePerPulse(distancePerPulse);
 		leftEncoder.setDistancePerPulse(distancePerPulse);
