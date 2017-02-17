@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
@@ -31,6 +32,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
  */
 
 public class Robot extends IterativeRobot {
+	private static final int LEFT_BUMPER_ID = 4;
 	Talon leftMotor0 = new Talon(0);
 	Talon leftMotor1 = new Talon(1);
 	Talon rightMotor0 = new Talon(2);
@@ -158,6 +160,7 @@ public class Robot extends IterativeRobot {
 	}
 
 	public void debug() {
+		SmartDashboard.putString("Left Bumper", "Pressed");
 //		SmartDashboard.putNumber("AccelX", accel.getX());
 //		SmartDashboard.putNumber("AccelY", accel.getY());
 //		SmartDashboard.putNumber("AccelZ", accel.getZ());
@@ -214,9 +217,10 @@ public class Robot extends IterativeRobot {
 		
 		setRobotDriveSpeed(drive, LP * speedAdjust, RP * speedAdjust);
 		//@TODO set fuel collector to joystick button
-		if (driveJoystick.getTrigger(GenericHID.Hand.kRight))
+		if (driveJoystick.getRawButton(LEFT_BUMPER_ID))
 		{
-			rotateWaterWheel(1);
+			rotateWaterWheel(fullSpeed);
+			debug();
 		}
 	}
 
