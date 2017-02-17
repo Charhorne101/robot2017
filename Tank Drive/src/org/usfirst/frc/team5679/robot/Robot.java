@@ -32,7 +32,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
  */
 
 public class Robot extends IterativeRobot {
-	private static final int LEFT_BUMPER_ID = 4;
+	private static final int LEFT_BUMPER_ID = 5;
 	Talon leftMotor0 = new Talon(0);
 	Talon leftMotor1 = new Talon(1);
 	Talon rightMotor0 = new Talon(2);
@@ -73,6 +73,8 @@ public class Robot extends IterativeRobot {
 	static final double minimumSpeed = 0.1;
 	static final int imageQuality = 20;
 	static final int fullSpeed = 1;
+	static final double waterWheelSpeed = -.50;
+	static final double waterWheelStop = 0;
 	static final double firingMaxDistance = 1;
 	static final String imageFileName = "/camera/image.jpg";
 
@@ -160,7 +162,6 @@ public class Robot extends IterativeRobot {
 	}
 
 	public void debug() {
-		SmartDashboard.putString("Left Bumper", "Pressed");
 //		SmartDashboard.putNumber("AccelX", accel.getX());
 //		SmartDashboard.putNumber("AccelY", accel.getY());
 //		SmartDashboard.putNumber("AccelZ", accel.getZ());
@@ -219,9 +220,17 @@ public class Robot extends IterativeRobot {
 		//@TODO set fuel collector to joystick button
 		if (driveJoystick.getRawButton(LEFT_BUMPER_ID))
 		{
-			rotateWaterWheel(fullSpeed);
-			debug();
+			rotateWaterWheel(waterWheelSpeed);
+
+			SmartDashboard.putString("Left Bumper", "Pressed");
 		}
+		else {
+
+			SmartDashboard.putString("Left Bumper", "Not Pressed");
+			rotateWaterWheel(waterWheelStop);
+			
+		}
+
 	}
 
 	/**
