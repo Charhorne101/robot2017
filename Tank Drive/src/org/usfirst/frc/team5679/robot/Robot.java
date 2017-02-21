@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -24,6 +25,10 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
  * directory.
  */
 
+/**
+ * @author Robotics
+ *
+ */
 public class Robot extends IterativeRobot {
 	private static final int B_BUTTON_ID = 2;
 	private static final int A_BUTTON_ID = 1;
@@ -139,14 +144,14 @@ public class Robot extends IterativeRobot {
 		switch (autonomousMode) {
 			// Mode 0, drive
 			case 0:
-				moveBase(distance, speed, 0);
+				moveBase(distance, speed);
 				break;
 			// Mode 1, Drive and fire
 			case 1: 
 				switch (stepToPerform) {
 					case 0:
 						// adjust the first number in the movebase call for number of feet to move in autonomous
-						nextStep = moveBase(distance, speed, 0);
+						nextStep = moveBase(distance, speed);
 						startTime = System.currentTimeMillis();
 						break;
 				}
@@ -176,16 +181,15 @@ public class Robot extends IterativeRobot {
 	 * This function is for moving forward a set number of feet. Returns a
 	 * boolean indicating whether the movement is complete.
 	 */
-	public boolean moveBase(double feet, double speed, double angle) {
+	public boolean moveBase(double feet, double speed) {
 		if (rightEncoder.getDistance() >= feet
 				|| leftEncoder.getDistance() >= feet) {
 			drive.tankDrive(-.2, -.2);
 			drive.tankDrive(0, 0);
 			return true;
-		} else {
-			drive.tankDrive(speed, speed * driveOffset);
-			return false;
 		}
+		drive.tankDrive(speed, speed * driveOffset);
+		return false;
 	}
 
 	/**
@@ -245,23 +249,20 @@ public class Robot extends IterativeRobot {
 
 	/**
 	 * This method sets the speed and applies the limiting speed factor for
-	 * Talons
+	 * SpeedControllers (motor)
 	 * 
-	 * @param motor
-	 * @param speed
+	 * @param motor the motor for which we are setting the speed.
+	 * @param speed to which we are setting the motor (base speed)
 	 */
-	public void setTalonSpeed(Talon motor, double speed) {
+	public void setMotorSpeed(SpeedController motor, double speed) {
 		motor.set(speed * speedFactor);
 	}
-	
-	public void setSparkSpeed(Spark motor, double speed) {
-		motor.set(speed * speedFactor);
-	}
+		
 	/**
 	 * This method sets the speed and applies the limiting speed factor for
 	 * robot Tank Drive
 	 * 
-	 * @param driveTrain
+	 * @param driveTrain 
 	 * @param leftSpeed
 	 * @param rightSpeed
 	 */
@@ -272,30 +273,39 @@ public class Robot extends IterativeRobot {
 
 	/**
 	 * This method dumps fuel.
-	 * 
+	 * @return when the servo is turned to a certain degree
 	 */
 	public boolean dumpFuel(){
-		turnServo(fuelDumpAngle);
+		turnServo(fuelDumpServo, fuelDumpAngle);
 		return true;
 	}
 	
+	/**
+	 * this method closes the fuel hatch.
+	 * @return when the hatch is closed 
+	 */
 	public boolean closeFuelHatch(){
-		turnServo(closeFuelHatchAngle);
+		turnServo(fuelDumpServo, closeFuelHatchAngle);
 		return true; 
 	}
 	
 	/**
 	 * Sets motor controller speed to specified value
 	 * @param speed must be between 1 and -1 (backwards)
-	 * @return
+	 * @return true when the waterwheel is successfully turning
 	 */
 	public boolean rotateWaterWheel (double speed){
-		setSparkSpeed(fuelCollectorController, speed);
+		setMotorSpeed(fuelCollectorController, speed);
 		return true;
 	}
 	
-	public void turnServo(double angle){
-		fuelDumpServo.setAngle(fuelDumpAngle);
+	/**
+	 * This method turns the servo to a certain angle.
+	 * @param servo the specific servo that we are going to turn.
+	 * @param angle how far we are going to turn the servo. 
+	 */
+	public void turnServo(Servo servo, double angle){
+		servo.setAngle(angle);
 	}
 	
 	public void bamboozleCamera(){
