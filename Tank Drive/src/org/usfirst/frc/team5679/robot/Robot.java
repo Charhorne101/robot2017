@@ -39,16 +39,12 @@ public class Robot extends IterativeRobot {
 	Talon leftMotor1 = new Talon(1);
 	Talon rightMotor0 = new Talon(2);
 	Talon rightMotor1 = new Talon(3);
-	//Talon talonBeltLeft = new Talon(4);
-	// @TODO check spark controller port number
 	Servo fuelDumpServo = new Servo(5);
 	
 	Spark fuelCollectorController = new Spark(4);
 	Joystick driveJoystick = new Joystick(0);
-	Joystick firingJoystick = new Joystick(1);
 	RobotDrive drive = new RobotDrive(leftMotor0, leftMotor1, rightMotor0,
 			rightMotor1);
-	DigitalInput firingLimitSwitch = new DigitalInput(0);
 	AnalogGyro gyro = new AnalogGyro(0);
 	BuiltInAccelerometer accel = new BuiltInAccelerometer();
 	Encoder rightEncoder = new Encoder(3, 4, false, EncodingType.k4X);
