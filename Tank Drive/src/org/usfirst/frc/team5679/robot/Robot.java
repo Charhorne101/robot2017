@@ -1,22 +1,15 @@
 package org.usfirst.frc.team5679.robot;
 
-import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
-
-import edu.wpi.cscore.CvSink;
-import edu.wpi.cscore.CvSource;
-import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -32,7 +25,10 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
  */
 
 public class Robot extends IterativeRobot {
+	private static final int B_BUTTON_ID = 2;
+	private static final int A_BUTTON_ID = 1;
 	private static final int LEFT_BUMPER_ID = 5;
+	private static final int RIGHT_BUMPER_ID = 6;
 	Talon leftMotor0 = new Talon(0);
 	Talon leftMotor1 = new Talon(1);
 	Talon rightMotor0 = new Talon(2);
@@ -40,6 +36,8 @@ public class Robot extends IterativeRobot {
 	//Talon talonBeltLeft = new Talon(4);
 	Talon talonDumpFuel = new Talon(5);
 	// @TODO check spark controller port number
+	Servo fuelDumpServo = new Servo(5);
+	
 	Spark fuelCollectorController = new Spark(4);
 	Joystick driveJoystick = new Joystick(0);
 	Joystick firingJoystick = new Joystick(1);
@@ -77,7 +75,9 @@ public class Robot extends IterativeRobot {
 	static final double waterWheelStop = 0;
 	static final double firingMaxDistance = 1;
 	static final String imageFileName = "/camera/image.jpg";
-
+	static final double fuelDumpAngle = 90;
+	static final double closeFuelHatchAngle = 0;
+	
 	double speedAdjust = 1;
 	double previousFireSpeed = 0;
 	boolean runOnce = true;
@@ -199,13 +199,18 @@ public class Robot extends IterativeRobot {
 		double RP = -driveJoystick.getRawAxis(5);
 			
 		if (driveJoystick.getRawAxis(3) > minJoystickValue){
-			speedAdjust = fullSpeed;
+			
+			rotateWaterWheel(waterWheelSpeed);
+
+			SmartDashboard.putString("Left Bumper", "Pressed");
 		}
 		else if (driveJoystick.getRawAxis(2) > minJoystickValue) {
-			speedAdjust = halfSpeed;
+			rotateWaterWheel(-waterWheelSpeed);
 		}
 		else {
-			speedAdjust = .85;
+		
+			SmartDashboard.putString("Left Bumper", "Not Pressed");
+			rotateWaterWheel(waterWheelStop);
 		}
 		
 		if (Math.abs(LP) < minimumSpeed) {
@@ -216,21 +221,26 @@ public class Robot extends IterativeRobot {
 			}
 		}
 		
-		setRobotDriveSpeed(drive, LP * speedAdjust, RP * speedAdjust);
+		
 		//@TODO set fuel collector to joystick button
 		if (driveJoystick.getRawButton(LEFT_BUMPER_ID))
 		{
-			rotateWaterWheel(waterWheelSpeed);
-
-			SmartDashboard.putString("Left Bumper", "Pressed");
+			speedAdjust = fullSpeed;
+		}
+		else if (driveJoystick.getRawButton(RIGHT_BUMPER_ID)){
+			speedAdjust = halfSpeed;
 		}
 		else {
-
-			SmartDashboard.putString("Left Bumper", "Not Pressed");
-			rotateWaterWheel(waterWheelStop);
-			
+			speedAdjust = .85;
 		}
-
+		setRobotDriveSpeed(drive, LP * speedAdjust, RP * speedAdjust);
+		
+		if (driveJoystick.getRawButton(A_BUTTON_ID)){
+			dumpFuel();
+		}
+		else if (driveJoystick.getRawButton(B_BUTTON_ID)){
+			closeFuelHatch();
+		}
 	}
 
 	/**
@@ -262,13 +272,16 @@ public class Robot extends IterativeRobot {
 
 	/**
 	 * This method dumps fuel.
-	 * robot Tank Drive
 	 * 
-	 * @param speed
 	 */
-	public boolean dumpFuel(double speed){
-		setTalonSpeed(talonDumpFuel, speed);
+	public boolean dumpFuel(){
+		turnServo(fuelDumpAngle);
 		return true;
+	}
+	
+	public boolean closeFuelHatch(){
+		turnServo(closeFuelHatchAngle);
+		return true; 
 	}
 	
 	/**
@@ -281,8 +294,8 @@ public class Robot extends IterativeRobot {
 		return true;
 	}
 	
-	public void turnServo(int angle){
-		throw new NotImplementedException();
+	public void turnServo(double angle){
+		fuelDumpServo.setAngle(fuelDumpAngle);
 	}
 	
 	public void bamboozleCamera(){
