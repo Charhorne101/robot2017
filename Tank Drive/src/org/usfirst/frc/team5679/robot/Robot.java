@@ -34,6 +34,7 @@ public class Robot extends IterativeRobot {
 	private static final int A_BUTTON_ID = 1;
 	private static final int LEFT_BUMPER_ID = 5;
 	private static final int RIGHT_BUMPER_ID = 6;
+	private static final int X_BUTTON_ID = 3;
 	Talon leftMotor0 = new Talon(0);
 	Talon leftMotor1 = new Talon(1);
 	Talon rightMotor0 = new Talon(2);
@@ -82,7 +83,7 @@ public class Robot extends IterativeRobot {
 	static final String imageFileName = "/camera/image.jpg";
 	static final double fuelDumpAngle = 90;
 	static final double closeFuelHatchAngle = 0;
-	
+		
 	double speedAdjust = 1;
 	double previousFireSpeed = 0;
 	boolean runOnce = true;
@@ -92,9 +93,11 @@ public class Robot extends IterativeRobot {
 	long fireTime = 5000;
 	int cameraCount = 0;
 	int cameraAttempts = 5;
-	String frontCamera = "Front Camera";
+	String frontCameraName = "Front Camera";
 	int frontCameraNumber = 0;
-	String activeCamera = frontCamera;
+	String rearCameraName = "Rear Camera";
+	int rearCameraNumber = 1;
+	String activeCameraName = frontCameraName;
 	int activeCameraNumber = frontCameraNumber;
 	
 	/**
@@ -103,7 +106,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		CameraServer.getInstance().startAutomaticCapture(activeCamera, activeCameraNumber);
+		CameraServer.getInstance().startAutomaticCapture(activeCameraName, activeCameraNumber);
 		
 		rightEncoder.setDistancePerPulse(distancePerPulse);
 		leftEncoder.setDistancePerPulse(distancePerPulse);
@@ -245,6 +248,9 @@ public class Robot extends IterativeRobot {
 		else if (driveJoystick.getRawButton(B_BUTTON_ID)){
 			closeFuelHatch();
 		}
+		if (driveJoystick.getRawButton(X_BUTTON_ID)){
+			bamboozleCamera();
+		}
 	}
 
 	/**
@@ -308,7 +314,19 @@ public class Robot extends IterativeRobot {
 		servo.setAngle(angle);
 	}
 	
+	/**
+	 * This function switches the camera from front to rear.
+	 * This function might cause an error.
+	 */
 	public void bamboozleCamera(){
-		throw new NotImplementedException();
+		if (activeCameraName == frontCameraName){
+			activeCameraName = rearCameraName;
+			activeCameraNumber = rearCameraNumber;
+		}
+		else {
+			activeCameraName = frontCameraName;
+			activeCameraNumber = frontCameraNumber; 
+		}
+		CameraServer.getInstance().startAutomaticCapture(activeCameraName, activeCameraNumber);
 	}
 }
