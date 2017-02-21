@@ -78,6 +78,7 @@ public class Robot extends IterativeRobot {
 	static final String imageFileName = "/camera/image.jpg";
 	static final double fuelDumpAngle = 90;
 	static final double closeFuelHatchAngle = 0;
+	static final double motorExpiration=.2;
 		
 	double speedAdjust = 1;
 	double previousFireSpeed = 0;
@@ -101,6 +102,11 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
+		leftMotor0.setExpiration(motorExpiration);
+		leftMotor1.setExpiration(motorExpiration);
+		rightMotor0.setExpiration(motorExpiration);
+		rightMotor1.setExpiration(motorExpiration);
+		fuelCollectorController.setExpiration(motorExpiration);
 		CameraServer.getInstance().startAutomaticCapture(activeCameraName, activeCameraNumber);
 		
 		rightEncoder.setDistancePerPulse(distancePerPulse);
@@ -242,9 +248,6 @@ public class Robot extends IterativeRobot {
 		}
 		else if (driveJoystick.getRawButton(B_BUTTON_ID)){
 			closeFuelHatch();
-		}
-		if (driveJoystick.getRawButton(X_BUTTON_ID)){
-			bamboozleCamera();
 		}
 	}
 
