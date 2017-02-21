@@ -40,7 +40,6 @@ public class Robot extends IterativeRobot {
 	Talon rightMotor0 = new Talon(2);
 	Talon rightMotor1 = new Talon(3);
 	//Talon talonBeltLeft = new Talon(4);
-	Talon talonDumpFuel = new Talon(5);
 	// @TODO check spark controller port number
 	Servo fuelDumpServo = new Servo(5);
 	
