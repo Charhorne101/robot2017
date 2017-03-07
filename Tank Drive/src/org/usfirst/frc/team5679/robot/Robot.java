@@ -72,7 +72,7 @@ public class Robot extends IterativeRobot {
 	static final double minimumSpeed = 0.1;
 	static final int imageQuality = 20;
 	static final int fullSpeed = 1;
-	static final double waterWheelSpeed = -.70;
+	static final double waterWheelSpeed = -.85;
 	static final double waterWheelStop = 0;
 	static final double firingMaxDistance = 1;
 	static final String imageFileName = "/camera/image.jpg";
