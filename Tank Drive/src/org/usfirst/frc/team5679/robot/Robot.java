@@ -30,6 +30,10 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
  *
  */
 public class Robot extends IterativeRobot {
+	private static final int REVERSE_WATERWHEEL_AXIS = 2;
+	private static final int WATERWHEEL_AXIS = 3;
+	private static final int RIGHT_AXIS = 5;
+	private static final int LEFT_AXIS = 1;
 	private static final int B_BUTTON_ID = 2;
 	private static final int A_BUTTON_ID = 1;
 	private static final int LEFT_BUMPER_ID = 5;
@@ -60,7 +64,7 @@ public class Robot extends IterativeRobot {
 	
 	static final double startingAngle = 0;
 	static final double Kp = .02;
-	static final double speedFactor = .75;
+	static final double speedFactor = 1;
 	static final double firingSpeedFactor = 1;
 	static final double driveOffset = .98;
 	// Adjust this value down for more distance in autonomous, up for less distance
@@ -72,13 +76,16 @@ public class Robot extends IterativeRobot {
 	static final double minimumSpeed = 0.1;
 	static final int imageQuality = 20;
 	static final int fullSpeed = 1;
-	static final double waterWheelSpeed = -.95;
+	static final double waterWheelSpeed = -1;
 	static final double waterWheelStop = 0;
 	static final double firingMaxDistance = 1;
 	static final String imageFileName = "/camera/image.jpg";
 	static final double fuelDumpAngle = 90;
 	static final double closeFuelHatchAngle = 0;
 	static final double motorExpiration=.2;
+	static final double autonomousDistance = 4;
+	static final double autonomousSpeed = .9;
+	static final double retrogradeSpeed = -.2;
 		
 	double speedAdjust = 1;
 	double previousFireSpeed = 0;
@@ -143,12 +150,11 @@ public class Robot extends IterativeRobot {
 		autonomousMode = autoChooser.getSelected();
 		
 		boolean nextStep = false;
-		int distance = 2;
-		double speed = .7;
+		
 		switch (autonomousMode) {
 			// Mode 0, drive
 			case 0:
-				nextStep = moveBase(distance, -speed);
+				nextStep = moveBase(autonomousDistance, -autonomousSpeed);
 				
 				break;
 			// Mode 1, Drive and fire
@@ -156,7 +162,7 @@ public class Robot extends IterativeRobot {
 				switch (stepToPerform) {
 					case 0:
 						// adjust the first number in the movebase call for number of feet to move in autonomous
-						nextStep = moveBase(distance, speed);
+						nextStep = moveBase(autonomousDistance, autonomousSpeed);
 						startTime = System.currentTimeMillis();
 						break;
 				}
@@ -188,7 +194,7 @@ public class Robot extends IterativeRobot {
 	public boolean moveBase(double feet, double speed) {
 		if (rightEncoder.getDistance() >= feet
 				|| leftEncoder.getDistance() >= feet) {
-			drive.tankDrive(-.2, -.2);
+			drive.tankDrive(retrogradeSpeed, retrogradeSpeed);
 			drive.tankDrive(0, 0);
 			return true;
 		}
@@ -204,16 +210,16 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		rightEncoder.reset();
 		leftEncoder.reset();
-		double LP = -driveJoystick.getRawAxis(1);
-		double RP = -driveJoystick.getRawAxis(5);
+		double LP = -driveJoystick.getRawAxis(LEFT_AXIS);
+		double RP = -driveJoystick.getRawAxis(RIGHT_AXIS);
 			
-		if (driveJoystick.getRawAxis(3) > minJoystickValue){
+		if (driveJoystick.getRawAxis(WATERWHEEL_AXIS) > minJoystickValue){
 			
 			rotateWaterWheel(waterWheelSpeed);
 
 			SmartDashboard.putString("Left Bumper", "Pressed");
 		}
-		else if (driveJoystick.getRawAxis(2) > minJoystickValue) {
+		else if (driveJoystick.getRawAxis(REVERSE_WATERWHEEL_AXIS) > minJoystickValue) {
 			rotateWaterWheel(-waterWheelSpeed);
 		}
 		else {
@@ -239,9 +245,7 @@ public class Robot extends IterativeRobot {
 		else if (driveJoystick.getRawButton(RIGHT_BUMPER_ID)){
 			speedAdjust = halfSpeed;
 		}
-		else {
-			speedAdjust = .95;
-		}
+		
 		setRobotDriveSpeed(drive, LP * speedAdjust, RP * speedAdjust);
 		
 		if (driveJoystick.getRawButton(A_BUTTON_ID)){
