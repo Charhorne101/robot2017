@@ -42,7 +42,7 @@ public class Robot extends IterativeRobot {
 	Servo fuelDumpServo = new Servo(5);
 	
 	Spark fuelCollectorController = new Spark(4);
-	Joystick driveJoystick = new Joystick(0);
+	Joystick driveJoystick = new Joystick(2);
 	RobotDrive drive = new RobotDrive(leftMotor0, leftMotor1, rightMotor0,
 			rightMotor1);
 	AnalogGyro gyro = new AnalogGyro(0);
@@ -72,7 +72,7 @@ public class Robot extends IterativeRobot {
 	static final double minimumSpeed = 0.1;
 	static final int imageQuality = 20;
 	static final int fullSpeed = 1;
-	static final double waterWheelSpeed = -.85;
+	static final double waterWheelSpeed = -.95;
 	static final double waterWheelStop = 0;
 	static final double firingMaxDistance = 1;
 	static final String imageFileName = "/camera/image.jpg";
@@ -143,12 +143,13 @@ public class Robot extends IterativeRobot {
 		autonomousMode = autoChooser.getSelected();
 		
 		boolean nextStep = false;
-		int distance = 16;
+		int distance = 2;
 		double speed = .7;
 		switch (autonomousMode) {
 			// Mode 0, drive
 			case 0:
-				moveBase(distance, speed);
+				nextStep = moveBase(distance, -speed);
+				
 				break;
 			// Mode 1, Drive and fire
 			case 1: 
@@ -171,14 +172,13 @@ public class Robot extends IterativeRobot {
 	}
 
 	public void debug() {
-//		SmartDashboard.putNumber("AccelX", accel.getX());
-//		SmartDashboard.putNumber("AccelY", accel.getY());
-//		SmartDashboard.putNumber("AccelZ", accel.getZ());
-//		SmartDashboard.putNumber("Joystick x", driveJoystick.getX());
-//		SmartDashboard.putNumber("Joystick y", driveJoystick.getY());
-//		SmartDashboard.putBoolean("Limit", firingLimitSwitch.get());
-//		SmartDashboard.putNumber("Right Encoder", rightEncoder.getDistance());
-//		SmartDashboard.putNumber("Left Encoder", -1 * leftEncoder.getDistance());
+		SmartDashboard.putNumber("AccelX", accel.getX());
+		SmartDashboard.putNumber("AccelY", accel.getY());
+		SmartDashboard.putNumber("AccelZ", accel.getZ());
+		SmartDashboard.putNumber("Joystick x", driveJoystick.getX());
+		SmartDashboard.putNumber("Joystick y", driveJoystick.getY());
+		SmartDashboard.putNumber("Right Encoder", rightEncoder.getDistance());
+		SmartDashboard.putNumber("Left Encoder", -1 * leftEncoder.getDistance());
 	}
 
 	/**
@@ -192,7 +192,8 @@ public class Robot extends IterativeRobot {
 			drive.tankDrive(0, 0);
 			return true;
 		}
-		drive.tankDrive(speed, speed * driveOffset);
+		
+		setRobotDriveSpeed(drive, speed, speed);
 		return false;
 	}
 
@@ -239,7 +240,7 @@ public class Robot extends IterativeRobot {
 			speedAdjust = halfSpeed;
 		}
 		else {
-			speedAdjust = .85;
+			speedAdjust = .95;
 		}
 		setRobotDriveSpeed(drive, LP * speedAdjust, RP * speedAdjust);
 		
@@ -272,6 +273,13 @@ public class Robot extends IterativeRobot {
 	 */
 	public void setRobotDriveSpeed(RobotDrive driveTrain, double leftSpeed,
 			double rightSpeed) {
+
+		SmartDashboard.putNumber("leftspeed", leftSpeed);
+		SmartDashboard.putNumber("rightspeed", rightSpeed);
+		SmartDashboard.putNumber("leftencoder", leftEncoder.getDistance());
+		SmartDashboard.putNumber("rightencoder", rightEncoder.getDistance());
+		
+		
 		driveTrain.tankDrive(leftSpeed * speedFactor, rightSpeed * speedFactor);
 	}
 
