@@ -84,7 +84,7 @@ public class Robot extends IterativeRobot {
 	static final double closeFuelHatchAngle = 0;
 	static final double motorExpiration=.2;
 	static final double autonomousDistance = 4;
-	static final double autonomousSpeed = .9;
+	static final double autonomousSpeed = .5;
 	static final double retrogradeSpeed = -.2;
 		
 	double speedAdjust = 1;
