@@ -84,10 +84,10 @@ public class Robot extends IterativeRobot {
 	static final double closeFuelHatchAngle = 0;
 	static final double motorExpiration=.2;
 	static final double autonomousDistance = 4;
-	static final double autonomousSpeed = .3;
+	static final double autonomousSpeed = .5;
 	static final double retrogradeSpeed = -.2;
 		
-	double speedAdjust = 1;
+	double speedAdjust = .8;
 	double previousFireSpeed = 0;
 	boolean runOnce = true;
 	boolean reverse = false;
@@ -210,8 +210,8 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		rightEncoder.reset();
 		leftEncoder.reset();
-		double LP = -driveJoystick.getRawAxis(LEFT_AXIS);
-		double RP = -driveJoystick.getRawAxis(RIGHT_AXIS);
+		double LP = driveJoystick.getRawAxis(LEFT_AXIS);
+		double RP = driveJoystick.getRawAxis(RIGHT_AXIS);
 			
 		if (driveJoystick.getRawAxis(WATERWHEEL_AXIS) > minJoystickValue){
 			
@@ -228,11 +228,11 @@ public class Robot extends IterativeRobot {
 			rotateWaterWheel(waterWheelStop);
 		}
 		
-		if (Math.abs(LP) < minimumSpeed) {
-			LP = 0;
+		if (Math.abs(RP) < minimumSpeed) {
+			RP = 0;
 
-			if (Math.abs(RP) < minimumSpeed) {
-				RP = 0;
+			if (Math.abs(LP) < minimumSpeed) {
+				LP = 0;
 			}
 		}
 		
