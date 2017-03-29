@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
@@ -15,9 +14,6 @@ import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.SampleRobot;
 
 
 /**
@@ -49,7 +45,7 @@ public class Robot extends IterativeRobot {
 	Servo fuelDumpServo = new Servo(5);
 	
 	Spark fuelCollectorController = new Spark(4);
-	Joystick driveJoystick = new Joystick(2);
+	Joystick driveJoystick = new Joystick(0);
 	RobotDrive drive = new RobotDrive(leftMotor0, leftMotor1, rightMotor0,
 			rightMotor1);
 	AnalogGyro gyro = new AnalogGyro(0);
@@ -143,6 +139,7 @@ public class Robot extends IterativeRobot {
 		leftEncoder.reset();
 		SmartDashboard.putString("autonomous init", "autonomous init");
 		stepToPerform = 0;
+		gyro.reset();
 	}
 
 	/**
@@ -202,6 +199,7 @@ public class Robot extends IterativeRobot {
 			return true;
 		}
 		
+		double angle = gyro.getAngle() * Kp;
 		setRobotDriveSpeed(drive, speed, speed);
 		return false;
 	}
@@ -249,7 +247,7 @@ public class Robot extends IterativeRobot {
 			speedAdjust = halfSpeed;
 		}
 		
-		setRobotDriveSpeed(drive, LP * speedAdjust, RP * speedAdjust);
+		setRobotDriveSpeed(drive, RP * speedAdjust, LP * speedAdjust);
 		
 		if (driveJoystick.getRawButton(A_BUTTON_ID)){
 			dumpFuel();
@@ -285,7 +283,6 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("rightspeed", rightSpeed);
 		SmartDashboard.putNumber("leftencoder", leftEncoder.getDistance());
 		SmartDashboard.putNumber("rightencoder", rightEncoder.getDistance());
-		
 		
 		driveTrain.tankDrive(leftSpeed * speedFactor, rightSpeed * speedFactor);
 	}
