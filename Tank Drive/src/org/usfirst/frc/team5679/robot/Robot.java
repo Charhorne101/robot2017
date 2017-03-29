@@ -16,6 +16,9 @@ import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.SampleRobot;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -340,3 +343,4 @@ public class Robot extends IterativeRobot {
 		CameraServer.getInstance().startAutomaticCapture(activeCameraName, activeCameraNumber);
 	}
 }
+
