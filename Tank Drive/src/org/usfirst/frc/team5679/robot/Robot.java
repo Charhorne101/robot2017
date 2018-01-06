@@ -28,9 +28,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * @author Robotics
  *
  */
-public class Robot extends IterativeRobot {
-	private static final int REVERSE_WATERWHEEL_AXIS = 2;
-	private static final int WATERWHEEL_AXIS = 3;
+public class Robot extends IterativeRobot 
 	private static final int RIGHT_AXIS = 5;
 	private static final int LEFT_AXIS = 1;
 	private static final int B_BUTTON_ID = 2;
@@ -67,7 +65,7 @@ public class Robot extends IterativeRobot {
 	static final double firingSpeedFactor = 1;
 	static final double driveOffset = .98;
 	// Adjust this value down for more distance in autonomous, up for less distance
-	static final double wheelCircumference = 1.43;
+	
 	static final double encoderPulses = 250;
 	static final double distancePerPulse = wheelCircumference / encoderPulses;
 	static final double halfSpeed = .5;
@@ -75,12 +73,8 @@ public class Robot extends IterativeRobot {
 	static final double minimumSpeed = 0.1;
 	static final int imageQuality = 20;
 	static final int fullSpeed = 1;
-	static final double waterWheelSpeed = -1;
-	static final double waterWheelStop = 0;
 	static final double firingMaxDistance = 1;
-	static final String imageFileName = "/camera/image.jpg";
-	static final double fuelDumpAngle = 90;
-	static final double closeFuelHatchAngle = 0;
+	static final String imageFileName = "/camera/image.jpg";;
 	static final double motorExpiration=.2;
 	static final double autonomousDistance = 4;
 	static final double autonomousSpeed = .5;
@@ -214,19 +208,17 @@ public class Robot extends IterativeRobot {
 		double LP = driveJoystick.getRawAxis(LEFT_AXIS);
 		double RP = driveJoystick.getRawAxis(RIGHT_AXIS);
 			
-		if (driveJoystick.getRawAxis(WATERWHEEL_AXIS) > minJoystickValue){
+		if (driveJoystick.getRawAxis() > minJoystickValue){
 			
 			rotateWaterWheel(waterWheelSpeed);
 
 			SmartDashboard.putString("Left Bumper", "Pressed");
-		}
-		else if (driveJoystick.getRawAxis(REVERSE_WATERWHEEL_AXIS) > minJoystickValue) {
-			rotateWaterWheel(-waterWheelSpeed);
+		
 		}
 		else {
 		
 			SmartDashboard.putString("Left Bumper", "Not Pressed");
-			rotateWaterWheel(waterWheelStop);
+		rotateWaterWheel(waterWheelStop);
 		}
 		
 		if (Math.abs(RP) < minimumSpeed) {
@@ -304,16 +296,10 @@ public class Robot extends IterativeRobot {
 		turnServo(fuelDumpServo, closeFuelHatchAngle);
 		return true; 
 	}
-	
-	/**
-	 * Sets motor controller speed to specified value
-	 * @param speed must be between 1 and -1 (backwards)
-	 * @return true when the waterwheel is successfully turning
+	 /**
+	 *Deleted roation containing fuel 
 	 */
-	public boolean rotateWaterWheel (double speed){
-		setMotorSpeed(fuelCollectorController, speed);
-		return true;
-	}
+	
 	
 	/**
 	 * This method turns the servo to a certain angle.
