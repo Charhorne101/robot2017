@@ -4,12 +4,12 @@ import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Servo;
-import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -29,8 +29,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  *
  */
 public class Robot extends IterativeRobot {
-	private static final int REVERSE_WATERWHEEL_AXIS = 2;
-	private static final int WATERWHEEL_AXIS = 3;
 	private static final int RIGHT_AXIS = 5;
 	private static final int LEFT_AXIS = 1;
 	private static final int B_BUTTON_ID = 2;
@@ -42,9 +40,7 @@ public class Robot extends IterativeRobot {
 	Talon leftMotor1 = new Talon(1);
 	Talon rightMotor0 = new Talon(2);
 	Talon rightMotor1 = new Talon(3);
-	Servo fuelDumpServo = new Servo(5);
 	
-	Spark fuelCollectorController = new Spark(4);
 	Joystick driveJoystick = new Joystick(0);
 	RobotDrive drive = new RobotDrive(leftMotor0, leftMotor1, rightMotor0,
 			rightMotor1);
@@ -75,12 +71,17 @@ public class Robot extends IterativeRobot {
 	static final double minimumSpeed = 0.1;
 	static final int imageQuality = 20;
 	static final int fullSpeed = 1;
-	static final double waterWheelSpeed = -1;
-	static final double waterWheelStop = 0;
+	
+	/**
+	*deleted because there's no more waterwheel
+	*/
+	
 	static final double firingMaxDistance = 1;
 	static final String imageFileName = "/camera/image.jpg";
-	static final double fuelDumpAngle = 90;
-	static final double closeFuelHatchAngle = 0;
+	/**
+	 *deleted because there's no more fuel
+	*/
+
 	static final double motorExpiration=.2;
 	static final double autonomousDistance = 4;
 	static final double autonomousSpeed = .5;
@@ -101,6 +102,11 @@ public class Robot extends IterativeRobot {
 	int rearCameraNumber = 1;
 	String activeCameraName = frontCameraName;
 	int activeCameraNumber = frontCameraNumber;
+	 
+	//Defining which panels are exactly where on the field.
+	PanelDirection homeSwitchDirection;
+	PanelDirection opponentSwitchDirection;
+	PanelDirection middleScaleDirection; 
 	
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -112,7 +118,6 @@ public class Robot extends IterativeRobot {
 		leftMotor1.setExpiration(motorExpiration);
 		rightMotor0.setExpiration(motorExpiration);
 		rightMotor1.setExpiration(motorExpiration);
-		fuelCollectorController.setExpiration(motorExpiration);
 		CameraServer.getInstance().startAutomaticCapture(activeCameraName, activeCameraNumber);
 		
 		rightEncoder.setDistancePerPulse(distancePerPulse);
@@ -135,6 +140,25 @@ public class Robot extends IterativeRobot {
 	 * loop.
 	 */
 	public void autonomousinit() {
+		String gameData = DriverStation.getInstance().getGameSpecificMessage();
+	if(gameData.charAt(0) == 'L')
+	{
+		homeSwitchDirection=PanelDirection.Left;
+	} else {
+		homeSwitchDirection=PanelDirection.Right;
+	}
+	if(gameData.charAt(1) == 'L')
+	{
+		middleScaleDirection=PanelDirection.Left;
+	} else {
+		middleScaleDirection=PanelDirection.Right;
+	}
+	if(gameData.charAt(2) == 'L')
+	{
+		opponentSwitchDirection=PanelDirection.Left;
+	} else {
+		opponentSwitchDirection=PanelDirection.Right;
+	}
 		rightEncoder.reset();
 		leftEncoder.reset();
 		SmartDashboard.putString("autonomous init", "autonomous init");
@@ -213,22 +237,7 @@ public class Robot extends IterativeRobot {
 		leftEncoder.reset();
 		double LP = driveJoystick.getRawAxis(LEFT_AXIS);
 		double RP = driveJoystick.getRawAxis(RIGHT_AXIS);
-			
-		if (driveJoystick.getRawAxis(WATERWHEEL_AXIS) > minJoystickValue){
-			
-			rotateWaterWheel(waterWheelSpeed);
-
-			SmartDashboard.putString("Left Bumper", "Pressed");
-		}
-		else if (driveJoystick.getRawAxis(REVERSE_WATERWHEEL_AXIS) > minJoystickValue) {
-			rotateWaterWheel(-waterWheelSpeed);
-		}
-		else {
-		
-			SmartDashboard.putString("Left Bumper", "Not Pressed");
-			rotateWaterWheel(waterWheelStop);
-		}
-		
+		 
 		if (Math.abs(RP) < minimumSpeed) {
 			RP = 0;
 
@@ -249,12 +258,8 @@ public class Robot extends IterativeRobot {
 		
 		setRobotDriveSpeed(drive, RP * speedAdjust, LP * speedAdjust);
 		
-		if (driveJoystick.getRawButton(A_BUTTON_ID)){
-			dumpFuel();
-		}
-		else if (driveJoystick.getRawButton(B_BUTTON_ID)){
-			closeFuelHatch();
-		}
+		
+		
 	}
 
 	/**
@@ -291,29 +296,14 @@ public class Robot extends IterativeRobot {
 	 * This method dumps fuel.
 	 * @return when the servo is turned to a certain degree
 	 */
-	public boolean dumpFuel(){
-		turnServo(fuelDumpServo, fuelDumpAngle);
-		return true;
-	}
 	
-	/**
-	 * this method closes the fuel hatch.
-	 * @return when the hatch is closed 
-	 */
-	public boolean closeFuelHatch(){
-		turnServo(fuelDumpServo, closeFuelHatchAngle);
-		return true; 
-	}
 	
-	/**
-	 * Sets motor controller speed to specified value
-	 * @param speed must be between 1 and -1 (backwards)
-	 * @return true when the waterwheel is successfully turning
-	 */
-	public boolean rotateWaterWheel (double speed){
-		setMotorSpeed(fuelCollectorController, speed);
-		return true;
-	}
+	
+	
+	
+	
+	
+	
 	
 	/**
 	 * This method turns the servo to a certain angle.
@@ -341,3 +331,8 @@ public class Robot extends IterativeRobot {
 	}
 }
 
+enum PanelDirection
+{
+	Right,
+	Left
+}
