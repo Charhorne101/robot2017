@@ -65,7 +65,6 @@ public class Robot extends IterativeRobot {
 	static final double firingSpeedFactor = 1;
 	static final double driveOffset = .98;
 	// Adjust this value down for more distance in autonomous, up for less distance
-	// Adjusting for 2018 Power Up Game 
 	
 	static final double encoderPulses = 250;
 	static final double halfSpeed = .5;
@@ -73,17 +72,8 @@ public class Robot extends IterativeRobot {
 	static final double minimumSpeed = 0.1;
 	static final int imageQuality = 20;
 	static final int fullSpeed = 1;
-	
-	/**
-	*deleted because there's no more waterwheel
-	*/
-	
 	static final double firingMaxDistance = 1;
 	static final String imageFileName = "/camera/image.jpg";
-	/**
-	 *deleted because there's no more fuel
-	*/
-
 	static final double motorExpiration=.2;
 	static final double autonomousDistance = 4;
 	static final double autonomousSpeed = .5;
@@ -148,11 +138,11 @@ public class Robot extends IterativeRobot {
 	public void autonomousinit() {
 		String gameData = DriverStation.getInstance().getGameSpecificMessage();
 	if(gameData.charAt(0) == 'L')
-	{ ((Object) leftScissorliftActuator).whenPressed (new Lift());
-	  rightScissorliftActuator.whenPressed(new Lift());
-	button3.whenPressed(new DriveToDistance(0.15));
-	button4.whenPressed(new PlaceCube());
-	button6.whenPressed(new DriveToDistance());
+	{ 
+		// TODO: Define buttons to control scissor lift actuator
+		//((Object) leftScissorliftActuator).whenPressed (new Lift());
+	    //rightScissorliftActuator.whenPressed(new Lift());
+
 	
 		homeSwitchDirection=PanelDirection.Left;
 	} else {
@@ -248,7 +238,18 @@ public class Robot extends IterativeRobot {
 		leftEncoder.reset();
 		double LP = driveJoystick.getRawAxis(LEFT_AXIS);
 		double RP = driveJoystick.getRawAxis(RIGHT_AXIS);
-		 
+			
+		if (driveJoystick.getRawAxis(1) > minJoystickValue){
+			
+			SmartDashboard.putString("Left Bumper", "Pressed");
+		
+		}
+		else {
+		
+			SmartDashboard.putString("Left Bumper", "Not Pressed");
+
+		}
+		
 		if (Math.abs(RP) < minimumSpeed) {
 			RP = 0;
 
@@ -303,17 +304,6 @@ public class Robot extends IterativeRobot {
 		driveTrain.tankDrive(leftSpeed * speedFactor, rightSpeed * speedFactor);
 	}
 
-	/**
-	 * This method dumps fuel.
-	 * @return when the servo is turned to a certain degree
-	 */
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	/**
