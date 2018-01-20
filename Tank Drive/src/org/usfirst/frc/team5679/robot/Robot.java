@@ -1,5 +1,4 @@
 package org.usfirst.frc.team5679.robot;
-
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.CameraServer;
@@ -12,6 +11,7 @@ import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -40,6 +40,8 @@ public class Robot extends IterativeRobot {
 	Talon leftMotor1 = new Talon(1);
 	Talon rightMotor0 = new Talon(2);
 	Talon rightMotor1 = new Talon(3);
+	Talon leftScissorliftActuator = new Talon(4);
+	Talon rightScissorliftActuator = new Talon (5);
 	
 	Joystick driveJoystick = new Joystick(0);
 	RobotDrive drive = new RobotDrive(leftMotor0, leftMotor1, rightMotor0,
@@ -59,13 +61,13 @@ public class Robot extends IterativeRobot {
 	
 	static final double startingAngle = 0;
 	static final double Kp = .02;
-	static final double speedFactor = 1;
+	static final double speedFactor = -1;
 	static final double firingSpeedFactor = 1;
 	static final double driveOffset = .98;
 	// Adjust this value down for more distance in autonomous, up for less distance
-	static final double wheelCircumference = 1.43;
+	// Adjusting for 2018 Power Up Game 
+	
 	static final double encoderPulses = 250;
-	static final double distancePerPulse = wheelCircumference / encoderPulses;
 	static final double halfSpeed = .5;
 	static final double minJoystickValue = 0.2;
 	static final double minimumSpeed = 0.1;
@@ -118,8 +120,12 @@ public class Robot extends IterativeRobot {
 		leftMotor1.setExpiration(motorExpiration);
 		rightMotor0.setExpiration(motorExpiration);
 		rightMotor1.setExpiration(motorExpiration);
+		leftScissorliftActuator.setExpiration(motorExpiration);
+		rightScissorliftActuator.setExpiration(motorExpiration);
+		
 		CameraServer.getInstance().startAutomaticCapture(activeCameraName, activeCameraNumber);
 		
+		double distancePerPulse = 0;
 		rightEncoder.setDistancePerPulse(distancePerPulse);
 		leftEncoder.setDistancePerPulse(distancePerPulse);
 
@@ -143,6 +149,7 @@ public class Robot extends IterativeRobot {
 		String gameData = DriverStation.getInstance().getGameSpecificMessage();
 	if(gameData.charAt(0) == 'L')
 	{
+	
 		homeSwitchDirection=PanelDirection.Left;
 	} else {
 		homeSwitchDirection=PanelDirection.Right;
