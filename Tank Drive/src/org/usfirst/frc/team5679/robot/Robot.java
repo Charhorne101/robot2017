@@ -148,7 +148,11 @@ public class Robot extends IterativeRobot {
 	public void autonomousinit() {
 		String gameData = DriverStation.getInstance().getGameSpecificMessage();
 	if(gameData.charAt(0) == 'L')
-	{
+	{ ((Object) leftScissorliftActuator).whenPressed (new Lift());
+	  rightScissorliftActuator.whenPressed(new Lift());
+	button3.whenPressed(new DriveToDistance(0.15));
+	button4.whenPressed(new PlaceCube());
+	button6.whenPressed(new DriveToDistance());
 	
 		homeSwitchDirection=PanelDirection.Left;
 	} else {
