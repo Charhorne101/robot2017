@@ -7,11 +7,12 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedController;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -40,12 +41,17 @@ public class Robot extends IterativeRobot {
 	Talon leftMotor1 = new Talon(1);
 	Talon rightMotor0 = new Talon(2);
 	Talon rightMotor1 = new Talon(3);
-	Talon leftScissorliftActuator = new Talon(4);
-	Talon rightScissorliftActuator = new Talon (5);
+	Spark leftScissorLiftActuator = new Spark(4);
+	Spark rightScissorLiftActuator = new Spark (5);
+	
 	
 	Joystick driveJoystick = new Joystick(0);
-	RobotDrive drive = new RobotDrive(leftMotor0, leftMotor1, rightMotor0,
-			rightMotor1);
+	SpeedControllerGroup m_left = new SpeedControllerGroup(leftMotor0, leftMotor1);
+	SpeedControllerGroup m_right = new SpeedControllerGroup(rightMotor0, rightMotor1);
+	DifferentialDrive drive = new DifferentialDrive(m_left, m_right);
+	
+	DifferentialDrive scissorLift = new DifferentialDrive(leftScissorLiftActuator, rightScissorLiftActuator);
+	
 	AnalogGyro gyro = new AnalogGyro(0);
 	BuiltInAccelerometer accel = new BuiltInAccelerometer();
 	Encoder rightEncoder = new Encoder(3, 4, false, EncodingType.k4X);
@@ -110,8 +116,8 @@ public class Robot extends IterativeRobot {
 		leftMotor1.setExpiration(motorExpiration);
 		rightMotor0.setExpiration(motorExpiration);
 		rightMotor1.setExpiration(motorExpiration);
-		leftScissorliftActuator.setExpiration(motorExpiration);
-		rightScissorliftActuator.setExpiration(motorExpiration);
+		leftScissorLiftActuator.setExpiration(motorExpiration);
+		rightScissorLiftActuator.setExpiration(motorExpiration);
 		
 		CameraServer.getInstance().startAutomaticCapture(activeCameraName, activeCameraNumber);
 		
@@ -139,7 +145,7 @@ public class Robot extends IterativeRobot {
 		String gameData = DriverStation.getInstance().getGameSpecificMessage();
 	if(gameData.charAt(0) == 'L')
 	{ 
-		// TODO: Define buttons to control scissor lift actuator
+		// TODO: Define buttons to control scissor lift actuator and finish autonomous code
 		//((Object) leftScissorliftActuator).whenPressed (new Lift());
 	    //rightScissorliftActuator.whenPressed(new Lift());
 
@@ -219,6 +225,7 @@ public class Robot extends IterativeRobot {
 	public boolean moveBase(double feet, double speed) {
 		if (rightEncoder.getDistance() >= feet
 				|| leftEncoder.getDistance() >= feet) {
+			
 			drive.tankDrive(retrogradeSpeed, retrogradeSpeed);
 			drive.tankDrive(0, 0);
 			return true;
@@ -289,11 +296,11 @@ public class Robot extends IterativeRobot {
 	 * This method sets the speed and applies the limiting speed factor for
 	 * robot Tank Drive
 	 * 
-	 * @param driveTrain 
+	 * @param drive2 
 	 * @param leftSpeed
 	 * @param rightSpeed
 	 */
-	public void setRobotDriveSpeed(RobotDrive driveTrain, double leftSpeed,
+	public void setRobotDriveSpeed(DifferentialDrive drive2, double leftSpeed,
 			double rightSpeed) {
 
 		SmartDashboard.putNumber("leftspeed", leftSpeed);
@@ -301,10 +308,12 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("leftencoder", leftEncoder.getDistance());
 		SmartDashboard.putNumber("rightencoder", rightEncoder.getDistance());
 		
-		driveTrain.tankDrive(leftSpeed * speedFactor, rightSpeed * speedFactor);
+		drive2.tankDrive(leftSpeed * speedFactor, rightSpeed * speedFactor);
 	}
 
-	
+	public void moveScissorLift(double speed) {
+		scissorLift.tankDrive(speed, speed);
+	}
 	
 	/**
 	 * This method turns the servo to a certain angle.
