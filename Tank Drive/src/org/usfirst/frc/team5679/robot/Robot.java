@@ -1,5 +1,7 @@
 package org.usfirst.frc.team5679.robot;
 import edu.wpi.first.wpilibj.AnalogGyro;
+import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
@@ -13,6 +15,7 @@ import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.interfaces.Potentiometer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -41,8 +44,14 @@ public class Robot extends IterativeRobot {
 	Talon leftMotor1 = new Talon(1);
 	Talon rightMotor0 = new Talon(2);
 	Talon rightMotor1 = new Talon(3);
-	Spark leftScissorLiftActuator = new Spark(4);
-	Spark rightScissorLiftActuator = new Spark (5);
+	Talon leftScissorLiftActuator = new Talon(4);
+	Talon rightScissorLiftActuator = new Talon (5);
+	Talon tiltScissorLiftActuator = new Talon (6);
+	Talon clawActuator = new Talon (7);
+	
+	// We aren't sure if this is the correct starting value lol (we will test it)
+	
+	Potentiometer pot = new AnalogPotentiometer(0, 360, 0);
 	
 	
 	Joystick driveJoystick = new Joystick(0);
