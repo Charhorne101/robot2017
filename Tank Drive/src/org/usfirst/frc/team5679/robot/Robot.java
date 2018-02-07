@@ -40,6 +40,8 @@ public class Robot extends IterativeRobot {
 	private static final int LEFT_BUMPER_ID = 5;
 	private static final int RIGHT_BUMPER_ID = 6;
 	private static final int X_BUTTON_ID = 3;
+	private static final double CLAW_OPEN_CLOSE_SPEED = 0.25;
+	
 	Talon leftMotor0 = new Talon(0);
 	Talon leftMotor1 = new Talon(1);
 	Talon rightMotor0 = new Talon(2);
@@ -90,8 +92,10 @@ public class Robot extends IterativeRobot {
 	static final double firingMaxDistance = 1;
 	static final String imageFileName = "/camera/image.jpg";
 	static final double motorExpiration=.2;
-	static final double autonomousDistance = 4;
+	static final double autonomousDistance = 13.834;
+	/// autonomous distance is now 13.8334 feet
 	static final double autonomousSpeed = .5;
+	/// make autonomous speed go faster? (we will test)
 	static final double retrogradeSpeed = -.2;
 		
 	double speedAdjust = .8;
@@ -347,6 +351,10 @@ public class Robot extends IterativeRobot {
 			activeCameraNumber = frontCameraNumber; 
 		}
 		CameraServer.getInstance().startAutomaticCapture(activeCameraName, activeCameraNumber);
+	}
+	
+	public void openClaw(Talon actuator) {
+		setMotorSpeed(actuator, CLAW_OPEN_CLOSE_SPEED);
 	}
 }
 
