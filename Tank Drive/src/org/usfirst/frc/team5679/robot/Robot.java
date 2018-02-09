@@ -33,7 +33,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  *
  */
 public class Robot extends IterativeRobot {
-	private static final int RIGHT_AXIS = 5;
+	private static final int RIGHT_AXIS = 5; 
 	private static final int LEFT_AXIS = 1;
 	private static final int B_BUTTON_ID = 2;
 	private static final int A_BUTTON_ID = 1;
@@ -131,6 +131,9 @@ public class Robot extends IterativeRobot {
 		rightMotor1.setExpiration(motorExpiration);
 		leftScissorLiftActuator.setExpiration(motorExpiration);
 		rightScissorLiftActuator.setExpiration(motorExpiration);
+		tiltScissorLiftActuator.setExpiration(motorExpiration);
+		clawActuator.setExpiration(motorExpiration);
+		
 		
 		CameraServer.getInstance().startAutomaticCapture(activeCameraName, activeCameraNumber);
 		
@@ -259,15 +262,21 @@ public class Robot extends IterativeRobot {
 		double LP = driveJoystick.getRawAxis(LEFT_AXIS);
 		double RP = driveJoystick.getRawAxis(RIGHT_AXIS);
 			
+		if (driveJoystick.getRawAxis(0)> minJoystickValue){
+			
+			SmartDashboard.putString("Right Bumper", "Pressed");
+		}
+		else {
+		
+			SmartDashboard.putString("Right Bumper", "Not Pressed");
+		}
 		if (driveJoystick.getRawAxis(1) > minJoystickValue){
 			
 			SmartDashboard.putString("Left Bumper", "Pressed");
-		
 		}
 		else {
 		
 			SmartDashboard.putString("Left Bumper", "Not Pressed");
-
 		}
 		
 		if (Math.abs(RP) < minimumSpeed) {
@@ -280,11 +289,11 @@ public class Robot extends IterativeRobot {
 		
 		
 		//@TODO set fuel collector to joystick button
-		if (driveJoystick.getRawButton(LEFT_BUMPER_ID))
+		if (driveJoystick.getRawButton(A_BUTTON_ID))
 		{
 			speedAdjust = fullSpeed;
 		}
-		else if (driveJoystick.getRawButton(RIGHT_BUMPER_ID)){
+		else if (driveJoystick.getRawButton(B_BUTTON_ID)){
 			speedAdjust = halfSpeed;
 		}
 		
