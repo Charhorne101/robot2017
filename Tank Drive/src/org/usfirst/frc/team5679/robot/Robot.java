@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
@@ -60,7 +61,8 @@ public class Robot extends IterativeRobot {
 	// We aren't sure if this is the correct starting value lol (we will test it)
 	
 	Potentiometer scissorLiftPotentiometer = new AnalogPotentiometer(2, SCISSOR_LIFT_MAX , 0);
-	
+	DigitalInput limitSwitchTop = new DigitalInput(4);
+	DigitalInput limitSwitchBottom = new DigitalInput(5);
 	
 	Joystick driveJoystick = new Joystick(0);
 	SpeedControllerGroup m_left = new SpeedControllerGroup(leftMotor0, leftMotor1);
@@ -269,7 +271,9 @@ public class Robot extends IterativeRobot {
 		double RP = driveJoystick.getRawAxis(RIGHT_AXIS);
 			
 		if (driveJoystick.getRawAxis(RIGHT_TRIGGER_ID)> minJoystickValue){
-			lowerClaw(CLAW_RAISE_LOWER_SPEED);
+			if (!limitSwitchBottom.get()) {
+				lowerClaw(CLAW_RAISE_LOWER_SPEED);
+			}
 			SmartDashboard.putString("Right Trigger", "Pressed");
 		}
 		else {
@@ -291,7 +295,10 @@ public class Robot extends IterativeRobot {
 		}
 	if  (driveJoystick.getRawButton(RIGHT_BUMPER_ID))	
 	{
-	raiseClaw(CLAW_RAISE_LOWER_SPEED);		
+			if (!limitSwitchTop.get()) {
+				raiseClaw(CLAW_RAISE_LOWER_SPEED);
+			}
+					
 			SmartDashboard.putString("Right Bumper", "Pressed");
 		}
 		else {
