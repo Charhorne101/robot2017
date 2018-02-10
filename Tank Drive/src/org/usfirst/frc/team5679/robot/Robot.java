@@ -1,6 +1,5 @@
 package org.usfirst.frc.team5679.robot;
 import edu.wpi.first.wpilibj.AnalogGyro;
-import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.CameraServer;
@@ -10,7 +9,6 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Servo;
-import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Talon;
@@ -39,8 +37,14 @@ public class Robot extends IterativeRobot {
 	private static final int A_BUTTON_ID = 1;
 	private static final int LEFT_BUMPER_ID = 5;
 	private static final int RIGHT_BUMPER_ID = 6;
+	private static final int LEFT_TRIGGER_ID = 2;
+	private static final int RIGHT_TRIGGER_ID = 3;
 	private static final int X_BUTTON_ID = 3;
 	private static final double CLAW_OPEN_CLOSE_SPEED = 0.25;
+	private static final double SCISSOR_LIFT_SPEED = .7;
+	private static final double SCISSOR_LIFT_MAX = 3600;
+	private static final double SCISSOR_LIFT_OFFSET = 100;
+	
 	
 	Talon leftMotor0 = new Talon(0);
 	Talon leftMotor1 = new Talon(1);
@@ -53,7 +57,7 @@ public class Robot extends IterativeRobot {
 	
 	// We aren't sure if this is the correct starting value lol (we will test it)
 	
-	Potentiometer pot = new AnalogPotentiometer(0, 360, 0);
+	Potentiometer scissorLiftPotentiometer = new AnalogPotentiometer(2, SCISSOR_LIFT_MAX , 0);
 	
 	
 	Joystick driveJoystick = new Joystick(0);
@@ -135,7 +139,7 @@ public class Robot extends IterativeRobot {
 		clawActuator.setExpiration(motorExpiration);
 		
 		
-		CameraServer.getInstance().startAutomaticCapture(activeCameraName, activeCameraNumber);
+		//CameraServer.getInstance().startAutomaticCapture(activeCameraName, activeCameraNumber);
 		
 		double distancePerPulse = 0;
 		rightEncoder.setDistancePerPulse(distancePerPulse);
@@ -262,7 +266,29 @@ public class Robot extends IterativeRobot {
 		double LP = driveJoystick.getRawAxis(LEFT_AXIS);
 		double RP = driveJoystick.getRawAxis(RIGHT_AXIS);
 			
-		if (driveJoystick.getRawAxis(0)> minJoystickValue){
+		if (driveJoystick.getRawAxis(RIGHT_TRIGGER_ID)> minJoystickValue){
+			
+			SmartDashboard.putString("Right Trigger", "Pressed");
+		}
+		else {
+		
+			SmartDashboard.putString("Right Trigger", "Not Pressed");
+		}
+		if (driveJoystick.getRawAxis(LEFT_TRIGGER_ID) > minJoystickValue){
+			
+			SmartDashboard.putString("Left Trigger", "Pressed"); 
+			// Send negative scissor lift speed to lower scissor lift
+			
+			//if (scissorLiftPotentiometer.get() > SCISSOR_LIFT_OFFSET) {
+				moveScissorLift(SCISSOR_LIFT_SPEED * -1);
+			//}
+		}
+		else {
+		
+			SmartDashboard.putString("Left Trigger", "Not Pressed");
+		}
+	if  (driveJoystick.getRawButton(RIGHT_BUMPER_ID))	
+	{
 			
 			SmartDashboard.putString("Right Bumper", "Pressed");
 		}
@@ -270,14 +296,20 @@ public class Robot extends IterativeRobot {
 		
 			SmartDashboard.putString("Right Bumper", "Not Pressed");
 		}
-		if (driveJoystick.getRawAxis(1) > minJoystickValue){
+		if (driveJoystick.getRawButton(LEFT_BUMPER_ID))
+		{
 			
 			SmartDashboard.putString("Left Bumper", "Pressed");
+			//if (scissorLiftPotentiometer.get() < SCISSOR_LIFT_MAX - SCISSOR_LIFT_OFFSET) {
+				moveScissorLift(SCISSOR_LIFT_SPEED * 1); 
+			//}
+	
 		}
 		else {
 		
 			SmartDashboard.putString("Left Bumper", "Not Pressed");
 		}
+		
 		
 		if (Math.abs(RP) < minimumSpeed) {
 			RP = 0;
