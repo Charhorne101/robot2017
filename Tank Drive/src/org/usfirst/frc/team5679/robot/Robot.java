@@ -40,10 +40,12 @@ public class Robot extends IterativeRobot {
 	private static final int LEFT_TRIGGER_ID = 2;
 	private static final int RIGHT_TRIGGER_ID = 3;
 	private static final int X_BUTTON_ID = 3;
+	private static final int Y_BUTTON_ID = 4;
 	private static final double CLAW_OPEN_CLOSE_SPEED = 0.25;
 	private static final double SCISSOR_LIFT_SPEED = .7;
 	private static final double SCISSOR_LIFT_MAX = 3600;
 	private static final double SCISSOR_LIFT_OFFSET = 100;
+	private static final double CLAW_RAISE_LOWER_SPEED = 0.25;
 	
 	
 	Talon leftMotor0 = new Talon(0);
@@ -267,7 +269,7 @@ public class Robot extends IterativeRobot {
 		double RP = driveJoystick.getRawAxis(RIGHT_AXIS);
 			
 		if (driveJoystick.getRawAxis(RIGHT_TRIGGER_ID)> minJoystickValue){
-			
+			lowerClaw(CLAW_RAISE_LOWER_SPEED);
 			SmartDashboard.putString("Right Trigger", "Pressed");
 		}
 		else {
@@ -289,7 +291,7 @@ public class Robot extends IterativeRobot {
 		}
 	if  (driveJoystick.getRawButton(RIGHT_BUMPER_ID))	
 	{
-			
+	raiseClaw(CLAW_RAISE_LOWER_SPEED);		
 			SmartDashboard.putString("Right Bumper", "Pressed");
 		}
 		else {
@@ -310,7 +312,24 @@ public class Robot extends IterativeRobot {
 			SmartDashboard.putString("Left Bumper", "Not Pressed");
 		}
 		
-		
+		if  (driveJoystick.getRawButton(A_BUTTON_ID))	
+		{
+			openClaw(CLAW_OPEN_CLOSE_SPEED);		
+				SmartDashboard.putString("A BUTTON ", "Pressed");
+			}
+			else {
+			
+				SmartDashboard.putString("A BUTTON", "Not Pressed");
+			}
+		if  (driveJoystick.getRawButton(B_BUTTON_ID))	
+		{
+			closeClaw(CLAW_OPEN_CLOSE_SPEED);		
+				SmartDashboard.putString("B BUTTON", "Pressed");
+			}
+			else {
+			
+				SmartDashboard.putString("B BUTTON", "Not Pressed");
+			}
 		if (Math.abs(RP) < minimumSpeed) {
 			RP = 0;
 
@@ -321,11 +340,11 @@ public class Robot extends IterativeRobot {
 		
 		
 		//@TODO set fuel collector to joystick button
-		if (driveJoystick.getRawButton(A_BUTTON_ID))
+		if (driveJoystick.getRawButton(X_BUTTON_ID))
 		{
 			speedAdjust = fullSpeed;
 		}
-		else if (driveJoystick.getRawButton(B_BUTTON_ID)){
+		else if (driveJoystick.getRawButton(Y_BUTTON_ID)){
 			speedAdjust = halfSpeed;
 		}
 		
@@ -394,8 +413,17 @@ public class Robot extends IterativeRobot {
 		CameraServer.getInstance().startAutomaticCapture(activeCameraName, activeCameraNumber);
 	}
 	
-	public void openClaw(Talon actuator) {
-		setMotorSpeed(actuator, CLAW_OPEN_CLOSE_SPEED);
+	public void openClaw(double speed) {
+		setMotorSpeed(clawActuator, speed);
+	}
+	public void closeClaw(double speed) {
+		setMotorSpeed(clawActuator, -1 * speed);
+	}
+	public void raiseClaw(double speed) {
+		setMotorSpeed(clawActuator, speed);
+	}
+	public void lowerClaw(double speed) {
+		setMotorSpeed(clawActuator, -1 * speed);
 	}
 }
 
