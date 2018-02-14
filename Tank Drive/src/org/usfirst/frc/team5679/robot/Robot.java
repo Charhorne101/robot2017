@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj.interfaces.Potentiometer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot
@@ -32,7 +31,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  *
  */
 public class Robot extends IterativeRobot {
-	private static final int RIGHT_AXIS = 5; 
+	private static final int RIGHT_AXIS = 5;
 	private static final int LEFT_AXIS = 1;
 	private static final int B_BUTTON_ID = 2;
 	private static final int A_BUTTON_ID = 1;
@@ -47,50 +46,49 @@ public class Robot extends IterativeRobot {
 	private static final double SCISSOR_LIFT_MAX = 3600;
 	private static final double SCISSOR_LIFT_OFFSET = 100;
 	private static final double CLAW_RAISE_LOWER_SPEED = 0.25;
-	
-	
+
 	Talon leftMotor0 = new Talon(0);
 	Talon leftMotor1 = new Talon(1);
 	Talon rightMotor0 = new Talon(2);
 	Talon rightMotor1 = new Talon(3);
 	Talon leftScissorLiftActuator = new Talon(4);
-	Talon rightScissorLiftActuator = new Talon (5);
-	Talon tiltScissorLiftActuator = new Talon (6);
-	Talon clawActuator = new Talon (7);
-	
+	Talon rightScissorLiftActuator = new Talon(5);
+	Talon tiltScissorLiftActuator = new Talon(6);
+	Talon clawActuator = new Talon(7);
+
 	// We aren't sure if this is the correct starting value lol (we will test it)
-	
-	Potentiometer scissorLiftPotentiometer = new AnalogPotentiometer(2, SCISSOR_LIFT_MAX , 0);
-	DigitalInput limitSwitchTop = new DigitalInput(4);
-	DigitalInput limitSwitchBottom = new DigitalInput(5);
-	
+
+	Potentiometer scissorLiftPotentiometer = new AnalogPotentiometer(2, SCISSOR_LIFT_MAX, 0);
+	DigitalInput limitSwitchTop = new DigitalInput(5);
+	DigitalInput limitSwitchBottom = new DigitalInput(6);
+
 	Joystick driveJoystick = new Joystick(0);
 	SpeedControllerGroup m_left = new SpeedControllerGroup(leftMotor0, leftMotor1);
 	SpeedControllerGroup m_right = new SpeedControllerGroup(rightMotor0, rightMotor1);
 	DifferentialDrive drive = new DifferentialDrive(m_left, m_right);
-	
+
 	DifferentialDrive scissorLift = new DifferentialDrive(leftScissorLiftActuator, rightScissorLiftActuator);
-	
+
 	AnalogGyro gyro = new AnalogGyro(0);
 	BuiltInAccelerometer accel = new BuiltInAccelerometer();
-	Encoder rightEncoder = new Encoder(3, 4, false, EncodingType.k4X);
+	Encoder rightEncoder = new Encoder(2, 3, false, EncodingType.k4X);
 	int fps = 10;
-	Encoder leftEncoder = new Encoder(1, 2, false, EncodingType.k4X);
+	Encoder leftEncoder = new Encoder(0, 1, false, EncodingType.k4X);
 
 	CameraServer camera;
 	int session;
 	// initialize default mode
-	private int autonomousMode = 0; 
+	private int autonomousMode = 0;
 	SendableChooser<Integer> autoChooser;
 	String cameraDesc = "Front";
-	
+
 	static final double startingAngle = 0;
 	static final double Kp = .02;
 	static final double speedFactor = -1;
 	static final double firingSpeedFactor = 1;
 	static final double driveOffset = .98;
 	// Adjust this value down for more distance in autonomous, up for less distance
-	
+
 	static final double encoderPulses = 250;
 	static final double halfSpeed = .5;
 	static final double minJoystickValue = 0.2;
@@ -99,13 +97,13 @@ public class Robot extends IterativeRobot {
 	static final int fullSpeed = 1;
 	static final double firingMaxDistance = 1;
 	static final String imageFileName = "/camera/image.jpg";
-	static final double motorExpiration=.2;
+	static final double motorExpiration = .2;
 	static final double autonomousDistance = 13.834;
 	/// autonomous distance is now 13.8334 feet
 	static final double autonomousSpeed = .5;
 	/// make autonomous speed go faster? (we will test)
 	static final double retrogradeSpeed = -.2;
-		
+
 	double speedAdjust = .8;
 	double previousFireSpeed = 0;
 	boolean runOnce = true;
@@ -121,15 +119,15 @@ public class Robot extends IterativeRobot {
 	int rearCameraNumber = 1;
 	String activeCameraName = frontCameraName;
 	int activeCameraNumber = frontCameraNumber;
-	 
-	//Defining which panels are exactly where on the field.
+
+	// Defining which panels are exactly where on the field.
 	PanelDirection homeSwitchDirection;
 	PanelDirection opponentSwitchDirection;
-	PanelDirection middleScaleDirection; 
-	
+	PanelDirection middleScaleDirection;
+
 	/**
-	 * This function is run when the robot is first started up and should be
-	 * used for any initialization code.
+	 * This function is run when the robot is first started up and should be used
+	 * for any initialization code.
 	 */
 	@Override
 	public void robotInit() {
@@ -141,10 +139,10 @@ public class Robot extends IterativeRobot {
 		rightScissorLiftActuator.setExpiration(motorExpiration);
 		tiltScissorLiftActuator.setExpiration(motorExpiration);
 		clawActuator.setExpiration(motorExpiration);
-		
-		
-		//CameraServer.getInstance().startAutomaticCapture(activeCameraName, activeCameraNumber);
-		
+
+		// CameraServer.getInstance().startAutomaticCapture(activeCameraName,
+		// activeCameraNumber);
+
 		double distancePerPulse = 0;
 		rightEncoder.setDistancePerPulse(distancePerPulse);
 		leftEncoder.setDistancePerPulse(distancePerPulse);
@@ -153,7 +151,7 @@ public class Robot extends IterativeRobot {
 
 		rightEncoder.reset();
 		leftEncoder.reset();
-		
+
 		autoChooser = new SendableChooser<Integer>();
 		autoChooser.addDefault("Drive", 0);
 		autoChooser.addObject("Drive and Fire", 1);
@@ -162,34 +160,30 @@ public class Robot extends IterativeRobot {
 	}
 
 	/**
-	 * This function sets up any necessary data before the autonomous control
-	 * loop.
+	 * This function sets up any necessary data before the autonomous control loop.
 	 */
 	public void autonomousinit() {
 		String gameData = DriverStation.getInstance().getGameSpecificMessage();
-	if(gameData.charAt(0) == 'L')
-	{ 
-		// TODO: Define buttons to control scissor lift actuator and finish autonomous code
-		//((Object) leftScissorliftActuator).whenPressed (new Lift());
-	    //rightScissorliftActuator.whenPressed(new Lift());
+		if (gameData.charAt(0) == 'L') {
+			// TODO: Define buttons to control scissor lift actuator and finish autonomous
+			// code
+			// ((Object) leftScissorliftActuator).whenPressed (new Lift());
+			// rightScissorliftActuator.whenPressed(new Lift());
 
-	
-		homeSwitchDirection=PanelDirection.Left;
-	} else {
-		homeSwitchDirection=PanelDirection.Right;
-	}
-	if(gameData.charAt(1) == 'L')
-	{
-		middleScaleDirection=PanelDirection.Left;
-	} else {
-		middleScaleDirection=PanelDirection.Right;
-	}
-	if(gameData.charAt(2) == 'L')
-	{
-		opponentSwitchDirection=PanelDirection.Left;
-	} else {
-		opponentSwitchDirection=PanelDirection.Right;
-	}
+			homeSwitchDirection = PanelDirection.Left;
+		} else {
+			homeSwitchDirection = PanelDirection.Right;
+		}
+		if (gameData.charAt(1) == 'L') {
+			middleScaleDirection = PanelDirection.Left;
+		} else {
+			middleScaleDirection = PanelDirection.Right;
+		}
+		if (gameData.charAt(2) == 'L') {
+			opponentSwitchDirection = PanelDirection.Left;
+		} else {
+			opponentSwitchDirection = PanelDirection.Right;
+		}
 		rightEncoder.reset();
 		leftEncoder.reset();
 		SmartDashboard.putString("autonomous init", "autonomous init");
@@ -203,30 +197,31 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousPeriodic() {
 		autonomousMode = autoChooser.getSelected();
-		
+
 		boolean nextStep = false;
-		
+
 		switch (autonomousMode) {
-			// Mode 0, drive
+		// Mode 0, drive
+		case 0:
+			nextStep = moveBase(autonomousDistance, autonomousSpeed);
+
+			break;
+		// Mode 1, Drive and fire
+		case 1:
+			switch (stepToPerform) {
 			case 0:
-				nextStep = moveBase(autonomousDistance, -autonomousSpeed);
-				
+				// adjust the first number in the movebase call for number of feet to move in
+				// autonomous
+				nextStep = moveBase(autonomousDistance, autonomousSpeed);
+				startTime = System.currentTimeMillis();
 				break;
-			// Mode 1, Drive and fire
-			case 1: 
-				switch (stepToPerform) {
-					case 0:
-						// adjust the first number in the movebase call for number of feet to move in autonomous
-						nextStep = moveBase(autonomousDistance, autonomousSpeed);
-						startTime = System.currentTimeMillis();
-						break;
-				}
-	
-				if (nextStep) {
-					stepToPerform++;
-				}
-				
-				break;
+			}
+
+			if (nextStep) {
+				stepToPerform++;
+			}
+
+			break;
 		}
 
 		debug();
@@ -243,18 +238,17 @@ public class Robot extends IterativeRobot {
 	}
 
 	/**
-	 * This function is for moving forward a set number of feet. Returns a
-	 * boolean indicating whether the movement is complete.
+	 * This function is for moving forward a set number of feet. Returns a boolean
+	 * indicating whether the movement is complete.
 	 */
 	public boolean moveBase(double feet, double speed) {
-		if (rightEncoder.getDistance() >= feet
-				|| leftEncoder.getDistance() >= feet) {
-			
+		if (rightEncoder.getDistance() >= feet || leftEncoder.getDistance() >= feet) {
+
 			drive.tankDrive(retrogradeSpeed, retrogradeSpeed);
 			drive.tankDrive(0, 0);
 			return true;
 		}
-		
+
 		double angle = gyro.getAngle() * Kp;
 		setRobotDriveSpeed(drive, speed, speed);
 		return false;
@@ -269,74 +263,65 @@ public class Robot extends IterativeRobot {
 		leftEncoder.reset();
 		double LP = driveJoystick.getRawAxis(LEFT_AXIS);
 		double RP = driveJoystick.getRawAxis(RIGHT_AXIS);
-			
-		if (driveJoystick.getRawAxis(RIGHT_TRIGGER_ID)> minJoystickValue){
+
+		if (driveJoystick.getRawAxis(RIGHT_TRIGGER_ID) > minJoystickValue) {
 			if (!limitSwitchBottom.get()) {
 				lowerClaw(CLAW_RAISE_LOWER_SPEED);
 			}
 			SmartDashboard.putString("Right Trigger", "Pressed");
-		}
-		else {
-		
+		} else {
+
 			SmartDashboard.putString("Right Trigger", "Not Pressed");
 		}
-		if (driveJoystick.getRawAxis(LEFT_TRIGGER_ID) > minJoystickValue){
-			
-			SmartDashboard.putString("Left Trigger", "Pressed"); 
+		if (driveJoystick.getRawAxis(LEFT_TRIGGER_ID) > minJoystickValue) {
+
+			SmartDashboard.putString("Left Trigger", "Pressed");
 			// Send negative scissor lift speed to lower scissor lift
-			
-			//if (scissorLiftPotentiometer.get() > SCISSOR_LIFT_OFFSET) {
-				moveScissorLift(SCISSOR_LIFT_SPEED * -1);
-			//}
-		}
-		else {
-		
+
+			// if (scissorLiftPotentiometer.get() > SCISSOR_LIFT_OFFSET) {
+			moveScissorLift(SCISSOR_LIFT_SPEED * -1);
+			// }
+		} else {
+
 			SmartDashboard.putString("Left Trigger", "Not Pressed");
 		}
-	if  (driveJoystick.getRawButton(RIGHT_BUMPER_ID))	
-	{
+		if (driveJoystick.getRawButton(RIGHT_BUMPER_ID)) {
 			if (!limitSwitchTop.get()) {
 				raiseClaw(CLAW_RAISE_LOWER_SPEED);
 			}
-					
+
 			SmartDashboard.putString("Right Bumper", "Pressed");
-		}
-		else {
-		
+		} else {
+
 			SmartDashboard.putString("Right Bumper", "Not Pressed");
 		}
-		if (driveJoystick.getRawButton(LEFT_BUMPER_ID))
-		{
-			
+		if (driveJoystick.getRawButton(LEFT_BUMPER_ID)) {
+
 			SmartDashboard.putString("Left Bumper", "Pressed");
-			//if (scissorLiftPotentiometer.get() < SCISSOR_LIFT_MAX - SCISSOR_LIFT_OFFSET) {
-				moveScissorLift(SCISSOR_LIFT_SPEED * 1); 
-			//}
-	
-		}
-		else {
-		
+			// if (scissorLiftPotentiometer.get() < SCISSOR_LIFT_MAX - SCISSOR_LIFT_OFFSET)
+			// {
+			moveScissorLift(SCISSOR_LIFT_SPEED * 1);
+			// }
+
+		} else {
+
 			SmartDashboard.putString("Left Bumper", "Not Pressed");
 		}
-		
-		if  (driveJoystick.getRawButton(A_BUTTON_ID))	
-		{
-			openClaw(CLAW_OPEN_CLOSE_SPEED);		
-				SmartDashboard.putString("A BUTTON ", "Pressed");
-			}
-			else {
-			
-				SmartDashboard.putString("A BUTTON", "Not Pressed");
-			}
-		if  (driveJoystick.getRawButton(B_BUTTON_ID))	
-		{
-			closeClaw(CLAW_OPEN_CLOSE_SPEED);		
-				SmartDashboard.putString("B BUTTON", "Pressed");
-			}
-			else {
-			
-				SmartDashboard.putString("B BUTTON", "Not Pressed");
-			}
+
+		if (driveJoystick.getRawButton(A_BUTTON_ID)) {
+			openClaw(CLAW_OPEN_CLOSE_SPEED);
+			SmartDashboard.putString("A BUTTON ", "Pressed");
+		} else {
+
+			SmartDashboard.putString("A BUTTON", "Not Pressed");
+		}
+		if (driveJoystick.getRawButton(B_BUTTON_ID)) {
+			closeClaw(CLAW_OPEN_CLOSE_SPEED);
+			SmartDashboard.putString("B BUTTON", "Pressed");
+		} else {
+
+			SmartDashboard.putString("B BUTTON", "Not Pressed");
+		}
 		if (Math.abs(RP) < minimumSpeed) {
 			RP = 0;
 
@@ -344,98 +329,97 @@ public class Robot extends IterativeRobot {
 				LP = 0;
 			}
 		}
-		
-		
-		//@TODO set fuel collector to joystick button
-		if (driveJoystick.getRawButton(X_BUTTON_ID))
-		{
+
+		// @TODO set fuel collector to joystick button
+		if (driveJoystick.getRawButton(X_BUTTON_ID)) {
 			speedAdjust = fullSpeed;
-		}
-		else if (driveJoystick.getRawButton(Y_BUTTON_ID)){
+		} else if (driveJoystick.getRawButton(Y_BUTTON_ID)) {
 			speedAdjust = halfSpeed;
 		}
-		
-		setRobotDriveSpeed(drive, RP * speedAdjust, LP * speedAdjust);
-		
-		
-		
+
+		setRobotDriveSpeed(drive, -RP * speedAdjust, -LP * speedAdjust);
+
 	}
 
 	/**
 	 * This method sets the speed and applies the limiting speed factor for
 	 * SpeedControllers (motor)
 	 * 
-	 * @param motor the motor for which we are setting the speed.
-	 * @param speed to which we are setting the motor (base speed)
+	 * @param motor
+	 *            the motor for which we are setting the speed.
+	 * @param speed
+	 *            to which we are setting the motor (base speed)
 	 */
 	public void setMotorSpeed(SpeedController motor, double speed) {
 		motor.set(speed * speedFactor);
 	}
-		
+
 	/**
-	 * This method sets the speed and applies the limiting speed factor for
-	 * robot Tank Drive
+	 * This method sets the speed and applies the limiting speed factor for robot
+	 * Tank Drive
 	 * 
-	 * @param drive2 
+	 * @param drive2
 	 * @param leftSpeed
 	 * @param rightSpeed
 	 */
-	public void setRobotDriveSpeed(DifferentialDrive drive2, double leftSpeed,
-			double rightSpeed) {
+	public void setRobotDriveSpeed(DifferentialDrive drive2, double leftSpeed, double rightSpeed) {
 
 		SmartDashboard.putNumber("leftspeed", leftSpeed);
 		SmartDashboard.putNumber("rightspeed", rightSpeed);
 		SmartDashboard.putNumber("leftencoder", leftEncoder.getDistance());
 		SmartDashboard.putNumber("rightencoder", rightEncoder.getDistance());
-		
+
 		drive2.tankDrive(leftSpeed * speedFactor, rightSpeed * speedFactor);
 	}
 
 	public void moveScissorLift(double speed) {
 		scissorLift.tankDrive(speed, speed);
 	}
-	
+
 	/**
 	 * This method turns the servo to a certain angle.
-	 * @param servo the specific servo that we are going to turn.
-	 * @param angle how far we are going to turn the servo. 
+	 * 
+	 * @param servo
+	 *            the specific servo that we are going to turn.
+	 * @param angle
+	 *            how far we are going to turn the servo.
 	 */
-	public void turnServo(Servo servo, double angle){
+	public void turnServo(Servo servo, double angle) {
 		servo.setAngle(angle);
 	}
-	
+
 	/**
-	 * This function switches the camera from front to rear.
-	 * This function might cause an error.
+	 * This function switches the camera from front to rear. This function might
+	 * cause an error.
 	 */
-	public void bamboozleCamera(){
-		if (activeCameraName == frontCameraName){
+	public void bamboozleCamera() {
+		if (activeCameraName == frontCameraName) {
 			activeCameraName = rearCameraName;
 			activeCameraNumber = rearCameraNumber;
-		}
-		else {
+		} else {
 			activeCameraName = frontCameraName;
-			activeCameraNumber = frontCameraNumber; 
+			activeCameraNumber = frontCameraNumber;
 		}
 		CameraServer.getInstance().startAutomaticCapture(activeCameraName, activeCameraNumber);
 	}
-	
+
 	public void openClaw(double speed) {
 		setMotorSpeed(clawActuator, speed);
 	}
+
 	public void closeClaw(double speed) {
 		setMotorSpeed(clawActuator, -1 * speed);
 	}
+
 	public void raiseClaw(double speed) {
 		setMotorSpeed(clawActuator, speed);
 	}
+
 	public void lowerClaw(double speed) {
 		setMotorSpeed(clawActuator, -1 * speed);
 	}
 }
 
-enum PanelDirection
-{
-	Right,
-	Left
+enum PanelDirection {
+	Right, Left
 }
