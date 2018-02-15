@@ -46,7 +46,7 @@ public class Robot extends IterativeRobot {
 	private static final double SCISSOR_LIFT_MAX = 3600;
 	private static final double SCISSOR_LIFT_OFFSET = 100;
 	private static final double CLAW_RAISE_LOWER_SPEED = 0.25;
-
+	
 	Talon leftMotor0 = new Talon(0);
 	Talon leftMotor1 = new Talon(1);
 	Talon rightMotor0 = new Talon(2);
@@ -81,7 +81,11 @@ public class Robot extends IterativeRobot {
 	private int autonomousMode = 0;
 	SendableChooser<Integer> autoChooser;
 	String cameraDesc = "Front";
+	
 
+	static final double wheelCircumference = 1.43;
+	static final double encoderPulses = 250;
+	static final double distancePerPulse = wheelCircumference / encoderPulses;
 	static final double startingAngle = 0;
 	static final double Kp = .02;
 	static final double speedFactor = -1;
@@ -89,7 +93,6 @@ public class Robot extends IterativeRobot {
 	static final double driveOffset = .98;
 	// Adjust this value down for more distance in autonomous, up for less distance
 
-	static final double encoderPulses = 250;
 	static final double halfSpeed = .5;
 	static final double minJoystickValue = 0.2;
 	static final double minimumSpeed = 0.1;
@@ -143,7 +146,6 @@ public class Robot extends IterativeRobot {
 		// CameraServer.getInstance().startAutomaticCapture(activeCameraName,
 		// activeCameraNumber);
 
-		double distancePerPulse = 0;
 		rightEncoder.setDistancePerPulse(distancePerPulse);
 		leftEncoder.setDistancePerPulse(distancePerPulse);
 
