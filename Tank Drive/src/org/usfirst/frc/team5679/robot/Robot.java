@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
@@ -43,7 +44,7 @@ public class Robot extends IterativeRobot {
 	private static final int Y_BUTTON_ID = 4;
 	private static final double CLAW_OPEN_CLOSE_SPEED = 0.25;
 	private static final double SCISSOR_LIFT_SPEED = .7;
-	private static final double SCISSOR_LIFT_MAX = 3600;
+	private static final double SCISSOR_LIFT_MAX = 360;
 	private static final double SCISSOR_LIFT_OFFSET = 100;
 	private static final double CLAW_RAISE_LOWER_SPEED = 0.25;
 	
@@ -53,12 +54,13 @@ public class Robot extends IterativeRobot {
 	Talon rightMotor1 = new Talon(3);
 	Talon leftScissorLiftActuator = new Talon(4);
 	Talon rightScissorLiftActuator = new Talon(5);
-	Talon tiltScissorLiftActuator = new Talon(6);
+	Talon tiltClawActuator = new Talon(6);
 	Talon clawActuator = new Talon(7);
 
 	// We aren't sure if this is the correct starting value lol (we will test it)
 
-	Potentiometer scissorLiftPotentiometer = new AnalogPotentiometer(2, SCISSOR_LIFT_MAX, 0);
+	Potentiometer leftScissorLiftPotentiometer = new AnalogPotentiometer(4, SCISSOR_LIFT_MAX, 0);
+	Potentiometer rightScissorLiftPotentiometer = new AnalogPotentiometer(5, SCISSOR_LIFT_MAX, 0);
 	DigitalInput limitSwitchTop = new DigitalInput(5);
 	DigitalInput limitSwitchBottom = new DigitalInput(6);
 
@@ -66,8 +68,8 @@ public class Robot extends IterativeRobot {
 	SpeedControllerGroup m_left = new SpeedControllerGroup(leftMotor0, leftMotor1);
 	SpeedControllerGroup m_right = new SpeedControllerGroup(rightMotor0, rightMotor1);
 	DifferentialDrive drive = new DifferentialDrive(m_left, m_right);
-
-	DifferentialDrive scissorLift = new DifferentialDrive(leftScissorLiftActuator, rightScissorLiftActuator);
+	
+	SpeedControllerGroup scissorLift = new SpeedControllerGroup(leftScissorLiftActuator, rightScissorLiftActuator);
 
 	AnalogGyro gyro = new AnalogGyro(0);
 	BuiltInAccelerometer accel = new BuiltInAccelerometer();
@@ -101,9 +103,9 @@ public class Robot extends IterativeRobot {
 	static final double firingMaxDistance = 1;
 	static final String imageFileName = "/camera/image.jpg";
 	static final double motorExpiration = .2;
-	static final double autonomousDistance = 13.834;
-	/// autonomous distance is now 13.8334 feet
-	static final double autonomousSpeed = .5;
+	static final double autonomousDistance = 12.834;
+	/// autonomous distance is now 12.8334 feet
+	static final double autonomousSpeed = .55;
 	/// make autonomous speed go faster? (we will test)
 	static final double retrogradeSpeed = -.2;
 
@@ -140,7 +142,7 @@ public class Robot extends IterativeRobot {
 		rightMotor1.setExpiration(motorExpiration);
 		leftScissorLiftActuator.setExpiration(motorExpiration);
 		rightScissorLiftActuator.setExpiration(motorExpiration);
-		tiltScissorLiftActuator.setExpiration(motorExpiration);
+		tiltClawActuator.setExpiration(motorExpiration);
 		clawActuator.setExpiration(motorExpiration);
 
 		// CameraServer.getInstance().startAutomaticCapture(activeCameraName,
@@ -159,7 +161,12 @@ public class Robot extends IterativeRobot {
 		autoChooser.addObject("Drive and Fire", 1);
 		SmartDashboard.putData("Autonomous mode chooser", autoChooser);
 		SmartDashboard.putString("Camera", cameraDesc);
+		
+		
+		SmartDashboard.putData("left Potent.", (Sendable) leftScissorLiftPotentiometer);
+		SmartDashboard.putData("right Potent.", (Sendable) rightScissorLiftPotentiometer);
 	}
+	
 
 	/**
 	 * This function sets up any necessary data before the autonomous control loop.
@@ -333,9 +340,10 @@ public class Robot extends IterativeRobot {
 		}
 
 		// @TODO set fuel collector to joystick button
-		if (driveJoystick.getRawButton(X_BUTTON_ID)) {
-			speedAdjust = fullSpeed;
-		} else if (driveJoystick.getRawButton(Y_BUTTON_ID)) {
+//		if (driveJoystick.getRawButton(X_BUTTON_ID)) {
+//			speedAdjust = fullSpeed;
+//		} else 
+		if (driveJoystick.getRawButton(Y_BUTTON_ID)) {
 			speedAdjust = halfSpeed;
 		}
 
@@ -375,7 +383,7 @@ public class Robot extends IterativeRobot {
 	}
 
 	public void moveScissorLift(double speed) {
-		scissorLift.tankDrive(speed, speed);
+		scissorLift.set(speed);
 	}
 
 	/**
