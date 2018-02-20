@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
@@ -59,8 +58,7 @@ public class Robot extends IterativeRobot {
 
 	// We aren't sure if this is the correct starting value lol (we will test it)
 
-	Potentiometer leftScissorLiftPotentiometer = new AnalogPotentiometer(4, SCISSOR_LIFT_MAX, 0);
-	Potentiometer rightScissorLiftPotentiometer = new AnalogPotentiometer(5, SCISSOR_LIFT_MAX, 0);
+	Potentiometer scissorLiftPotentiometer = new AnalogPotentiometer(4, SCISSOR_LIFT_MAX, 0);
 	DigitalInput limitSwitchTop = new DigitalInput(5);
 	DigitalInput limitSwitchBottom = new DigitalInput(6);
 
@@ -141,7 +139,6 @@ public class Robot extends IterativeRobot {
 		rightMotor0.setExpiration(motorExpiration);
 		rightMotor1.setExpiration(motorExpiration);
 		leftScissorLiftActuator.setExpiration(motorExpiration);
-		rightScissorLiftActuator.setExpiration(motorExpiration);
 		tiltClawActuator.setExpiration(motorExpiration);
 		clawActuator.setExpiration(motorExpiration);
 
@@ -163,7 +160,7 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putString("Camera", cameraDesc);
 		
 		
-		SmartDashboard.putNumber("potentiometer", leftScissorLiftPotentiometer.get());
+		SmartDashboard.putNumber("potentiometer", scissorLiftPotentiometer.get());
 	}
 	
 
@@ -171,6 +168,7 @@ public class Robot extends IterativeRobot {
 	 * This function sets up any necessary data before the autonomous control loop.
 	 */
 	public void autonomousinit() {
+		SmartDashboard.putNumber("potentiometer", scissorLiftPotentiometer.get());
 		String gameData = DriverStation.getInstance().getGameSpecificMessage();
 		if (gameData.charAt(0) == 'L') {
 			// TODO: Define buttons to control scissor lift actuator and finish autonomous
@@ -267,6 +265,8 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
+		SmartDashboard.putNumber("potentiometer", scissorLiftPotentiometer.get());
+		
 		rightEncoder.reset();
 		leftEncoder.reset();
 		double LP = driveJoystick.getRawAxis(LEFT_AXIS);
@@ -286,9 +286,9 @@ public class Robot extends IterativeRobot {
 			SmartDashboard.putString("Left Trigger", "Pressed");
 			// Send negative scissor lift speed to lower scissor lift
 
-			// if (scissorLiftPotentiometer.get() > SCISSOR_LIFT_OFFSET) {
-			moveScissorLift(SCISSOR_LIFT_SPEED * -1);
-			// }
+			//if (scissorLiftPotentiometer.get() > SCISSOR_LIFT_OFFSET) {
+				moveScissorLift(SCISSOR_LIFT_SPEED * -1);
+			//}
 		} else {
 
 			SmartDashboard.putString("Left Trigger", "Not Pressed");
@@ -306,10 +306,10 @@ public class Robot extends IterativeRobot {
 		if (driveJoystick.getRawButton(LEFT_BUMPER_ID)) {
 
 			SmartDashboard.putString("Left Bumper", "Pressed");
-			// if (scissorLiftPotentiometer.get() < SCISSOR_LIFT_MAX - SCISSOR_LIFT_OFFSET)
-			// {
-			moveScissorLift(SCISSOR_LIFT_SPEED * 1);
-			// }
+			//if (scissorLiftPotentiometer.get() < SCISSOR_LIFT_MAX - SCISSOR_LIFT_OFFSET)
+			//{
+				moveScissorLift(SCISSOR_LIFT_SPEED * 1);
+			//}
 
 		} else {
 
