@@ -163,8 +163,7 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putString("Camera", cameraDesc);
 		
 		
-		SmartDashboard.putData("left Potent.", (Sendable) leftScissorLiftPotentiometer);
-		SmartDashboard.putData("right Potent.", (Sendable) rightScissorLiftPotentiometer);
+		SmartDashboard.putNumber("potentiometer", leftScissorLiftPotentiometer.get());
 	}
 	
 
