@@ -3,8 +3,9 @@ import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
-import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
@@ -43,8 +44,8 @@ public class Robot extends IterativeRobot {
 	private static final int Y_BUTTON_ID = 4;
 	private static final double CLAW_OPEN_CLOSE_SPEED = 0.25;
 	private static final double SCISSOR_LIFT_SPEED = .7;
-	private static final double SCISSOR_LIFT_MAX = 360;
-	private static final double SCISSOR_LIFT_OFFSET = 100;
+	private static final double SCISSOR_LIFT_MAX = 1000;
+	private static final double SCISSOR_LIFT_OFFSET = 10;
 	private static final double CLAW_RAISE_LOWER_SPEED = 0.25;
 	
 	Talon leftMotor0 = new Talon(0);
@@ -58,10 +59,12 @@ public class Robot extends IterativeRobot {
 
 	// We aren't sure if this is the correct starting value lol (we will test it)
 
-	Potentiometer scissorLiftPotentiometer = new AnalogPotentiometer(4, SCISSOR_LIFT_MAX, 0);
-	DigitalInput limitSwitchTop = new DigitalInput(5);
-	DigitalInput limitSwitchBottom = new DigitalInput(6);
-
+	Potentiometer scissorLiftPotentiometer = new AnalogPotentiometer(0, SCISSOR_LIFT_MAX);
+	Counter limitSwitchLeftTop = new Counter(8);
+	Counter limitSwitchLeftBottom = new Counter(9);
+	Counter limitSwitchRightTop = new Counter(6);
+	Counter limitSwitchRightBottom = new Counter(7);
+	
 	Joystick driveJoystick = new Joystick(0);
 	SpeedControllerGroup m_left = new SpeedControllerGroup(leftMotor0, leftMotor1);
 	SpeedControllerGroup m_right = new SpeedControllerGroup(rightMotor0, rightMotor1);
@@ -69,7 +72,7 @@ public class Robot extends IterativeRobot {
 	
 	SpeedControllerGroup scissorLift = new SpeedControllerGroup(leftScissorLiftActuator, rightScissorLiftActuator);
 
-	AnalogGyro gyro = new AnalogGyro(0);
+	//AnalogGyro gyro = new AnalogGyro(0);
 	BuiltInAccelerometer accel = new BuiltInAccelerometer();
 	Encoder rightEncoder = new Encoder(2, 3, false, EncodingType.k4X);
 	int fps = 10;
@@ -194,7 +197,7 @@ public class Robot extends IterativeRobot {
 		leftEncoder.reset();
 		SmartDashboard.putString("autonomous init", "autonomous init");
 		stepToPerform = 0;
-		gyro.reset();
+		//gyro.reset();
 	}
 
 	/**
@@ -255,7 +258,7 @@ public class Robot extends IterativeRobot {
 			return true;
 		}
 
-		double angle = gyro.getAngle() * Kp;
+		//double angle = gyro.getAngle() * Kp;
 		setRobotDriveSpeed(drive, speed, speed);
 		return false;
 	}
@@ -266,6 +269,30 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		SmartDashboard.putNumber("potentiometer", scissorLiftPotentiometer.get());
+		SmartDashboard.putNumber("limit left top", limitSwitchLeftTop.get());
+		SmartDashboard.putNumber("limit left bottom", limitSwitchLeftBottom.get());
+		SmartDashboard.putNumber("limit right top", limitSwitchLeftTop.get());
+		SmartDashboard.putNumber("limit right bottom", limitSwitchLeftBottom.get());
+		SmartDashboard.putNumber("limit left top distance", limitSwitchLeftTop.getDistance());
+		SmartDashboard.putNumber("limit left bottom distance", limitSwitchLeftBottom.getDistance());
+		SmartDashboard.putNumber("limit right top distance", limitSwitchLeftTop.getDistance());
+		SmartDashboard.putNumber("limit right bottom distance", limitSwitchLeftBottom.getDistance());
+		SmartDashboard.putNumber("limit left top period", limitSwitchLeftTop.getPeriod());
+		SmartDashboard.putNumber("limit left bottom period", limitSwitchLeftBottom.getPeriod());
+		SmartDashboard.putNumber("limit right top period", limitSwitchLeftTop.getPeriod());
+		SmartDashboard.putNumber("limit right bottom period", limitSwitchLeftBottom.getPeriod());
+		SmartDashboard.putBoolean("limit left top direction", limitSwitchLeftTop.getDirection());
+		SmartDashboard.putBoolean("limit left bottom direction", limitSwitchLeftBottom.getDirection());
+		SmartDashboard.putBoolean("limit right top direction", limitSwitchLeftTop.getDirection());
+		SmartDashboard.putBoolean("limit right bottom direction", limitSwitchLeftBottom.getDirection());
+		SmartDashboard.putNumber("limit left top rate", limitSwitchLeftTop.getRate());
+		SmartDashboard.putNumber("limit left bottom rate ", limitSwitchLeftBottom.getRate());
+		SmartDashboard.putNumber("limit right top rate", limitSwitchLeftTop.getRate());
+		SmartDashboard.putNumber("limit right bottom rate", limitSwitchLeftBottom.getRate());
+		SmartDashboard.putBoolean("limit left top stop", limitSwitchLeftTop.getStopped());
+		SmartDashboard.putBoolean("limit left bottom", limitSwitchLeftBottom.getStopped());
+		SmartDashboard.putBoolean("limit right top", limitSwitchLeftTop.getStopped());
+		SmartDashboard.putBoolean("limit right bottom", limitSwitchLeftBottom.getStopped());
 		
 		rightEncoder.reset();
 		leftEncoder.reset();
@@ -273,9 +300,9 @@ public class Robot extends IterativeRobot {
 		double RP = driveJoystick.getRawAxis(RIGHT_AXIS);
 
 		if (driveJoystick.getRawAxis(RIGHT_TRIGGER_ID) > minJoystickValue) {
-			if (!limitSwitchBottom.get()) {
+			//if (!limitSwitchBottom.get()) {
 				lowerClaw(CLAW_RAISE_LOWER_SPEED);
-			}
+			//}
 			SmartDashboard.putString("Right Trigger", "Pressed");
 		} else {
 
@@ -286,17 +313,17 @@ public class Robot extends IterativeRobot {
 			SmartDashboard.putString("Left Trigger", "Pressed");
 			// Send negative scissor lift speed to lower scissor lift
 
-			//if (scissorLiftPotentiometer.get() > SCISSOR_LIFT_OFFSET) {
-				moveScissorLift(SCISSOR_LIFT_SPEED * -1);
-			//}
+//			if (limitSwitchLeftBottom.get() && limitSwitchRightBottom.get()) {
+//				moveScissorLift(SCISSOR_LIFT_SPEED * -1);
+//			}
 		} else {
 
 			SmartDashboard.putString("Left Trigger", "Not Pressed");
 		}
 		if (driveJoystick.getRawButton(RIGHT_BUMPER_ID)) {
-			if (!limitSwitchTop.get()) {
+			//if (!limitSwitchTop.get()) {
 				raiseClaw(CLAW_RAISE_LOWER_SPEED);
-			}
+			//}
 
 			SmartDashboard.putString("Right Bumper", "Pressed");
 		} else {
@@ -306,10 +333,9 @@ public class Robot extends IterativeRobot {
 		if (driveJoystick.getRawButton(LEFT_BUMPER_ID)) {
 
 			SmartDashboard.putString("Left Bumper", "Pressed");
-			//if (scissorLiftPotentiometer.get() < SCISSOR_LIFT_MAX - SCISSOR_LIFT_OFFSET)
-			//{
-				moveScissorLift(SCISSOR_LIFT_SPEED * 1);
-			//}
+//			if (limitSwitchRightTop.get() && limitSwitchLeftTop.get()) {
+//				moveScissorLift(SCISSOR_LIFT_SPEED * 1);
+//			}
 
 		} else {
 
