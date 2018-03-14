@@ -1,11 +1,9 @@
 package org.usfirst.frc.team5679.robot;
-import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.CameraServer;
-import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
-import edu.wpi.first.wpilibj.Counter;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
@@ -60,10 +58,9 @@ public class Robot extends IterativeRobot {
 	// We aren't sure if this is the correct starting value lol (we will test it)
 
 	Potentiometer scissorLiftPotentiometer = new AnalogPotentiometer(0, SCISSOR_LIFT_MAX);
-	Counter limitSwitchLeftTop = new Counter(8);
-	Counter limitSwitchLeftBottom = new Counter(9);
-	Counter limitSwitchRightTop = new Counter(6);
-	Counter limitSwitchRightBottom = new Counter(7);
+	
+	DigitalInput limitSwitchLiftTop = new DigitalInput(6);
+	DigitalInput limitSwitchLiftBottom = new DigitalInput(7);
 	
 	Joystick driveJoystick = new Joystick(0);
 	SpeedControllerGroup m_left = new SpeedControllerGroup(leftMotor0, leftMotor1);
@@ -268,32 +265,10 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
-		SmartDashboard.putNumber("potentiometer", scissorLiftPotentiometer.get());
-		SmartDashboard.putNumber("limit left top", limitSwitchLeftTop.get());
-		SmartDashboard.putNumber("limit left bottom", limitSwitchLeftBottom.get());
-		SmartDashboard.putNumber("limit right top", limitSwitchLeftTop.get());
-		SmartDashboard.putNumber("limit right bottom", limitSwitchLeftBottom.get());
-		SmartDashboard.putNumber("limit left top distance", limitSwitchLeftTop.getDistance());
-		SmartDashboard.putNumber("limit left bottom distance", limitSwitchLeftBottom.getDistance());
-		SmartDashboard.putNumber("limit right top distance", limitSwitchLeftTop.getDistance());
-		SmartDashboard.putNumber("limit right bottom distance", limitSwitchLeftBottom.getDistance());
-		SmartDashboard.putNumber("limit left top period", limitSwitchLeftTop.getPeriod());
-		SmartDashboard.putNumber("limit left bottom period", limitSwitchLeftBottom.getPeriod());
-		SmartDashboard.putNumber("limit right top period", limitSwitchLeftTop.getPeriod());
-		SmartDashboard.putNumber("limit right bottom period", limitSwitchLeftBottom.getPeriod());
-		SmartDashboard.putBoolean("limit left top direction", limitSwitchLeftTop.getDirection());
-		SmartDashboard.putBoolean("limit left bottom direction", limitSwitchLeftBottom.getDirection());
-		SmartDashboard.putBoolean("limit right top direction", limitSwitchLeftTop.getDirection());
-		SmartDashboard.putBoolean("limit right bottom direction", limitSwitchLeftBottom.getDirection());
-		SmartDashboard.putNumber("limit left top rate", limitSwitchLeftTop.getRate());
-		SmartDashboard.putNumber("limit left bottom rate ", limitSwitchLeftBottom.getRate());
-		SmartDashboard.putNumber("limit right top rate", limitSwitchLeftTop.getRate());
-		SmartDashboard.putNumber("limit right bottom rate", limitSwitchLeftBottom.getRate());
-		SmartDashboard.putBoolean("limit left top stop", limitSwitchLeftTop.getStopped());
-		SmartDashboard.putBoolean("limit left bottom", limitSwitchLeftBottom.getStopped());
-		SmartDashboard.putBoolean("limit right top", limitSwitchLeftTop.getStopped());
-		SmartDashboard.putBoolean("limit right bottom", limitSwitchLeftBottom.getStopped());
-		
+		//SmartDashboard.putNumber("potentiometer", scissorLiftPotentiometer.get());
+		SmartDashboard.putBoolean("limit lift top",limitSwitchLiftTop.get());
+		SmartDashboard.putBoolean("limit lift bottom", limitSwitchLiftBottom.get());
+//		
 		rightEncoder.reset();
 		leftEncoder.reset();
 		double LP = driveJoystick.getRawAxis(LEFT_AXIS);
@@ -313,9 +288,9 @@ public class Robot extends IterativeRobot {
 			SmartDashboard.putString("Left Trigger", "Pressed");
 			// Send negative scissor lift speed to lower scissor lift
 
-//			if (limitSwitchLeftBottom.get() && limitSwitchRightBottom.get()) {
-//				moveScissorLift(SCISSOR_LIFT_SPEED * -1);
-//			}
+			if (limitSwitchLiftBottom.get()) {
+				moveScissorLift(SCISSOR_LIFT_SPEED * -1);
+			}
 		} else {
 
 			SmartDashboard.putString("Left Trigger", "Not Pressed");
@@ -333,9 +308,9 @@ public class Robot extends IterativeRobot {
 		if (driveJoystick.getRawButton(LEFT_BUMPER_ID)) {
 
 			SmartDashboard.putString("Left Bumper", "Pressed");
-//			if (limitSwitchRightTop.get() && limitSwitchLeftTop.get()) {
-//				moveScissorLift(SCISSOR_LIFT_SPEED * 1);
-//			}
+			if (limitSwitchLiftTop.get()) {
+				moveScissorLift(SCISSOR_LIFT_SPEED * 1);
+			}
 
 		} else {
 
