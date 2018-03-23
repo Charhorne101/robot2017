@@ -101,7 +101,7 @@ public class Robot extends IterativeRobot {
 	static final double firingMaxDistance = 1;
 	static final String imageFileName = "/camera/image.jpg";
 	static final double motorExpiration = .2;
-	static final double autonomousDistance = 12.834;
+	static final double autonomousDistance = 11;
 	/// autonomous distance is now 12.8334 feet
 	static final double autonomousSpeed = .55;
 	/// make autonomous speed go faster? (we will test)
@@ -250,8 +250,8 @@ public class Robot extends IterativeRobot {
 	public boolean moveBase(double feet, double speed) {
 		if (rightEncoder.getDistance() >= feet || leftEncoder.getDistance() >= feet) {
 
-			drive.tankDrive(retrogradeSpeed, retrogradeSpeed);
-			drive.tankDrive(0, 0);
+			//drive.tankDrive(retrogradeSpeed, retrogradeSpeed);
+			setRobotDriveSpeed(drive, 0, 0);
 			return true;
 		}
 
