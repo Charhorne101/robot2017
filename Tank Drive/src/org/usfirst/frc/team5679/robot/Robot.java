@@ -40,6 +40,7 @@ public class Robot extends IterativeRobot {
 	private static final double SCISSOR_LIFT_MAX = 1000;
 	private static final double SCISSOR_LIFT_OFFSET = 10;
 	private static final double CLAW_RAISE_LOWER_SPEED = 0.25;
+	private static final double ENCODER_DEGREE_PER_COUNT = 360/1120;
 	
 	Talon leftMotor0 = new Talon(0);
 	Talon leftMotor1 = new Talon(1);
@@ -48,6 +49,7 @@ public class Robot extends IterativeRobot {
 	Talon leftScissorLiftActuator = new Talon(4);
 	Talon rightScissorLiftActuator = new Talon(5);
 	Talon tiltClawActuator = new Talon(6);
+	Talon clawActuator = new Talon(7);
 	
 	DigitalInput limitSwitchLiftTop = new DigitalInput(6);
 	DigitalInput limitSwitchLiftBottom = new DigitalInput(7);
@@ -61,6 +63,8 @@ public class Robot extends IterativeRobot {
 
 	Encoder rightEncoder = new Encoder(2, 3, false, EncodingType.k4X);
 	Encoder leftEncoder = new Encoder(0, 1, false, EncodingType.k4X);
+
+	Encoder clawEncoder = new Encoder(4, 5, false, EncodingType.k4X);
 	
 	CameraServer camera;
 	int session;	
@@ -174,6 +178,8 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
+		double degreesTurn = clawEncoder.get();
+		SmartDashboard.putNumber("claw encoder degrees", degreesTurn);
 		SmartDashboard.putString("Autonomous", "Teleop");
 		SmartDashboard.putBoolean("limit lift top",limitSwitchLiftTop.get());
 		SmartDashboard.putBoolean("limit lift bottom", limitSwitchLiftBottom.get());		
