@@ -1,6 +1,4 @@
 package org.usfirst.frc.team5679.robot;
-import edu.wpi.first.wpilibj.AnalogPotentiometer;
-import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -8,13 +6,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.interfaces.Potentiometer;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -53,11 +48,6 @@ public class Robot extends IterativeRobot {
 	Talon leftScissorLiftActuator = new Talon(4);
 	Talon rightScissorLiftActuator = new Talon(5);
 	Talon tiltClawActuator = new Talon(6);
-	Talon clawActuator = new Talon(7);
-
-	// We aren't sure if this is the correct starting value lol (we will test it)
-
-	Potentiometer scissorLiftPotentiometer = new AnalogPotentiometer(0, SCISSOR_LIFT_MAX);
 	
 	DigitalInput limitSwitchLiftTop = new DigitalInput(6);
 	DigitalInput limitSwitchLiftBottom = new DigitalInput(7);
@@ -69,59 +59,27 @@ public class Robot extends IterativeRobot {
 	
 	SpeedControllerGroup scissorLift = new SpeedControllerGroup(leftScissorLiftActuator, rightScissorLiftActuator);
 
-	//AnalogGyro gyro = new AnalogGyro(0);
-	BuiltInAccelerometer accel = new BuiltInAccelerometer();
 	Encoder rightEncoder = new Encoder(2, 3, false, EncodingType.k4X);
-	int fps = 10;
 	Encoder leftEncoder = new Encoder(0, 1, false, EncodingType.k4X);
-
-	CameraServer camera;
-	int session;
-	// initialize default mode
-	private int autonomousMode = 0;
-	SendableChooser<Integer> autoChooser;
-	String cameraDesc = "Front";
 	
+	CameraServer camera;
+	int session;	
 
 	static final double wheelCircumference = 1.43;
 	static final double encoderPulses = 250;
 	static final double distancePerPulse = wheelCircumference / encoderPulses;
-	static final double startingAngle = 0;
-	static final double Kp = .02;
 	static final double speedFactor = -1;
-	static final double firingSpeedFactor = 1;
 	static final double driveOffset = .98;
-	// Adjust this value down for more distance in autonomous, up for less distance
 
 	static final double halfSpeed = .5;
 	static final double minJoystickValue = 0.2;
 	static final double minimumSpeed = 0.1;
-	static final int imageQuality = 20;
 	static final int fullSpeed = 1;
-	static final double firingMaxDistance = 1;
-	static final String imageFileName = "/camera/image.jpg";
 	static final double motorExpiration = .2;
 	static final double autonomousDistance = 11;
-	/// autonomous distance is now 12.8334 feet
-	static final double autonomousSpeed = .55;
-	/// make autonomous speed go faster? (we will test)
+	static final double autonomousSpeed = .4;
 	static final double retrogradeSpeed = -.2;
-
 	double speedAdjust = .8;
-	double previousFireSpeed = 0;
-	boolean runOnce = true;
-	boolean reverse = false;
-	int stepToPerform = 0;
-	long startTime;
-	long fireTime = 5000;
-	int cameraCount = 0;
-	int cameraAttempts = 5;
-	String frontCameraName = "Front Camera";
-	int frontCameraNumber = 0;
-	String rearCameraName = "Rear Camera";
-	int rearCameraNumber = 1;
-	String activeCameraName = frontCameraName;
-	int activeCameraNumber = frontCameraNumber;
 
 	// Defining which panels are exactly where on the field.
 	PanelDirection homeSwitchDirection;
@@ -134,6 +92,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
+		SmartDashboard.putString("Autonomous", "Robot Init");
 		leftMotor0.setExpiration(motorExpiration);
 		leftMotor1.setExpiration(motorExpiration);
 		rightMotor0.setExpiration(motorExpiration);
@@ -142,33 +101,20 @@ public class Robot extends IterativeRobot {
 		tiltClawActuator.setExpiration(motorExpiration);
 		clawActuator.setExpiration(motorExpiration);
 
-		// CameraServer.getInstance().startAutomaticCapture(activeCameraName,
-		// activeCameraNumber);
-
 		rightEncoder.setDistancePerPulse(distancePerPulse);
 		leftEncoder.setDistancePerPulse(distancePerPulse);
 
 		SmartDashboard.putString("robot init", "robot init");
 
 		rightEncoder.reset();
-		leftEncoder.reset();
-
-		autoChooser = new SendableChooser<Integer>();
-		autoChooser.addDefault("Drive", 0);
-		autoChooser.addObject("Drive and Fire", 1);
-		SmartDashboard.putData("Autonomous mode chooser", autoChooser);
-		SmartDashboard.putString("Camera", cameraDesc);
-		
-		
-		SmartDashboard.putNumber("potentiometer", scissorLiftPotentiometer.get());
-	}
-	
+		leftEncoder.reset();				
+	}	
 
 	/**
 	 * This function sets up any necessary data before the autonomous control loop.
 	 */
 	public void autonomousinit() {
-		SmartDashboard.putNumber("potentiometer", scissorLiftPotentiometer.get());
+		SmartDashboard.putString("Autonomous", "Init");
 		String gameData = DriverStation.getInstance().getGameSpecificMessage();
 		if (gameData.charAt(0) == 'L') {
 			// TODO: Define buttons to control scissor lift actuator and finish autonomous
@@ -192,9 +138,16 @@ public class Robot extends IterativeRobot {
 		}
 		rightEncoder.reset();
 		leftEncoder.reset();
-		SmartDashboard.putString("autonomous init", "autonomous init");
-		stepToPerform = 0;
-		//gyro.reset();
+	}
+
+	public void debug() {
+		SmartDashboard.putNumber("Joystick x", driveJoystick.getX());
+		SmartDashboard.putNumber("Joystick y", driveJoystick.getY());
+		SmartDashboard.putNumber("Right Encoder", rightEncoder.getDistance());
+		SmartDashboard.putNumber("Left Encoder", leftEncoder.getDistance());
+		SmartDashboard.putNumber("Automous Distance Limit", autonomousDistance);
+		SmartDashboard.putBoolean("Autonomous Right Distance Triggered", rightEncoder.getDistance() >= autonomousDistance);
+		SmartDashboard.putBoolean("Autonomous Left Distance Triggered", leftEncoder.getDistance() >= autonomousDistance);
 	}
 
 	/**
@@ -202,73 +155,28 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		autonomousMode = autoChooser.getSelected();
-
-		boolean nextStep = false;
-
-		switch (autonomousMode) {
-		// Mode 0, drive
-		case 0:
-			nextStep = moveBase(autonomousDistance, autonomousSpeed);
-
-			break;
-		// Mode 1, Drive and fire
-		case 1:
-			switch (stepToPerform) {
-			case 0:
-				// adjust the first number in the movebase call for number of feet to move in
-				// autonomous
-				nextStep = moveBase(autonomousDistance, autonomousSpeed);
-				startTime = System.currentTimeMillis();
-				break;
-			}
-
-			if (nextStep) {
-				stepToPerform++;
-			}
-
-			break;
-		}
-
 		debug();
-	}
-
-	public void debug() {
-		SmartDashboard.putNumber("AccelX", accel.getX());
-		SmartDashboard.putNumber("AccelY", accel.getY());
-		SmartDashboard.putNumber("AccelZ", accel.getZ());
-		SmartDashboard.putNumber("Joystick x", driveJoystick.getX());
-		SmartDashboard.putNumber("Joystick y", driveJoystick.getY());
-		SmartDashboard.putNumber("Right Encoder", rightEncoder.getDistance());
-		SmartDashboard.putNumber("Left Encoder", -1 * leftEncoder.getDistance());
-	}
-
-	/**
-	 * This function is for moving forward a set number of feet. Returns a boolean
-	 * indicating whether the movement is complete.
-	 */
-	public boolean moveBase(double feet, double speed) {
-		if (rightEncoder.getDistance() >= feet || leftEncoder.getDistance() >= feet) {
-
-			//drive.tankDrive(retrogradeSpeed, retrogradeSpeed);
-			setRobotDriveSpeed(drive, 0, 0);
-			return true;
+				
+		if (Math.abs(rightEncoder.getDistance()) >= autonomousDistance || Math.abs(leftEncoder.getDistance()) >= autonomousDistance) {
+			SmartDashboard.putString("Autonomous", "Stop");
+            drive.tankDrive(retrogradeSpeed, retrogradeSpeed);
+            drive.tankDrive(0, 0);
+			//drive.stopMotor();
 		}
-
-		//double angle = gyro.getAngle() * Kp;
-		setRobotDriveSpeed(drive, speed, speed);
-		return false;
+		else {
+			setRobotDriveSpeed(autonomousSpeed, autonomousSpeed);
+			SmartDashboard.putString("Autonomous", "Go");
+		}
 	}
-
+	
 	/**
 	 * This function is called periodically during operator control
 	 */
 	@Override
 	public void teleopPeriodic() {
-		//SmartDashboard.putNumber("potentiometer", scissorLiftPotentiometer.get());
+		SmartDashboard.putString("Autonomous", "Teleop");
 		SmartDashboard.putBoolean("limit lift top",limitSwitchLiftTop.get());
-		SmartDashboard.putBoolean("limit lift bottom", limitSwitchLiftBottom.get());
-//		
+		SmartDashboard.putBoolean("limit lift bottom", limitSwitchLiftBottom.get());		
 		rightEncoder.reset();
 		leftEncoder.reset();
 		double LP = driveJoystick.getRawAxis(LEFT_AXIS);
@@ -339,15 +247,11 @@ public class Robot extends IterativeRobot {
 			}
 		}
 
-		// @TODO set fuel collector to joystick button
-//		if (driveJoystick.getRawButton(X_BUTTON_ID)) {
-//			speedAdjust = fullSpeed;
-//		} else 
 		if (driveJoystick.getRawButton(Y_BUTTON_ID)) {
 			speedAdjust = halfSpeed;
 		}
 
-		setRobotDriveSpeed(drive, -RP * speedAdjust, -LP * speedAdjust);
+		setRobotDriveSpeed(-RP * speedAdjust, -LP * speedAdjust);
 
 	}
 
@@ -368,49 +272,18 @@ public class Robot extends IterativeRobot {
 	 * This method sets the speed and applies the limiting speed factor for robot
 	 * Tank Drive
 	 * 
-	 * @param drive2
 	 * @param leftSpeed
 	 * @param rightSpeed
 	 */
-	public void setRobotDriveSpeed(DifferentialDrive drive2, double leftSpeed, double rightSpeed) {
-
+	public void setRobotDriveSpeed(double leftSpeed, double rightSpeed) {
 		SmartDashboard.putNumber("leftspeed", leftSpeed);
 		SmartDashboard.putNumber("rightspeed", rightSpeed);
-		SmartDashboard.putNumber("leftencoder", leftEncoder.getDistance());
-		SmartDashboard.putNumber("rightencoder", rightEncoder.getDistance());
 
-		drive2.tankDrive(leftSpeed * speedFactor, rightSpeed * speedFactor);
+		drive.tankDrive(leftSpeed * speedFactor, rightSpeed * speedFactor);
 	}
 
 	public void moveScissorLift(double speed) {
 		scissorLift.set(speed);
-	}
-
-	/**
-	 * This method turns the servo to a certain angle.
-	 * 
-	 * @param servo
-	 *            the specific servo that we are going to turn.
-	 * @param angle
-	 *            how far we are going to turn the servo.
-	 */
-	public void turnServo(Servo servo, double angle) {
-		servo.setAngle(angle);
-	}
-
-	/**
-	 * This function switches the camera from front to rear. This function might
-	 * cause an error.
-	 */
-	public void bamboozleCamera() {
-		if (activeCameraName == frontCameraName) {
-			activeCameraName = rearCameraName;
-			activeCameraNumber = rearCameraNumber;
-		} else {
-			activeCameraName = frontCameraName;
-			activeCameraNumber = frontCameraNumber;
-		}
-		CameraServer.getInstance().startAutomaticCapture(activeCameraName, activeCameraNumber);
 	}
 
 	public void openClaw(double speed) {
@@ -422,11 +295,11 @@ public class Robot extends IterativeRobot {
 	}
 
 	public void raiseClaw(double speed) {
-		setMotorSpeed(clawActuator, speed);
+		setMotorSpeed(tiltClawActuator, speed);
 	}
 
 	public void lowerClaw(double speed) {
-		setMotorSpeed(clawActuator, -1 * speed);
+		setMotorSpeed(tiltClawActuator, -1 * speed);
 	}
 }
 
