@@ -9,9 +9,9 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot
@@ -40,7 +40,6 @@ public class Robot extends IterativeRobot {
 	private static final double SCISSOR_LIFT_MAX = 1000;
 	private static final double SCISSOR_LIFT_OFFSET = 10;
 	private static final double CLAW_RAISE_LOWER_SPEED = 0.25;
-	private static final double ENCODER_DEGREE_PER_COUNT = 360/1120;
 	
 	Talon leftMotor0 = new Talon(0);
 	Talon leftMotor1 = new Talon(1);
@@ -48,11 +47,12 @@ public class Robot extends IterativeRobot {
 	Talon rightMotor1 = new Talon(3);
 	Talon leftScissorLiftActuator = new Talon(4);
 	Talon rightScissorLiftActuator = new Talon(5);
-	Talon tiltClawActuator = new Talon(6);
+	Victor tiltClawActuator = new Victor(6);
 	Talon clawActuator = new Talon(7);
 	
 	DigitalInput limitSwitchLiftTop = new DigitalInput(6);
 	DigitalInput limitSwitchLiftBottom = new DigitalInput(7);
+	DigitalInput limitSwitchClaw = new DigitalInput(4);
 	
 	Joystick driveJoystick = new Joystick(0);
 	SpeedControllerGroup m_left = new SpeedControllerGroup(leftMotor0, leftMotor1);
@@ -63,8 +63,6 @@ public class Robot extends IterativeRobot {
 
 	Encoder rightEncoder = new Encoder(2, 3, false, EncodingType.k4X);
 	Encoder leftEncoder = new Encoder(0, 1, false, EncodingType.k4X);
-
-	Encoder clawEncoder = new Encoder(4, 5, false, EncodingType.k4X);
 	
 	CameraServer camera;
 	int session;	
@@ -72,6 +70,7 @@ public class Robot extends IterativeRobot {
 	static final double wheelCircumference = 1.43;
 	static final double encoderPulses = 250;
 	static final double distancePerPulse = wheelCircumference / encoderPulses;
+	static final double clawDistancePerPulse = 360 / 7*71;
 	static final double speedFactor = -1;
 	static final double driveOffset = .98;
 
@@ -111,7 +110,7 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putString("robot init", "robot init");
 
 		rightEncoder.reset();
-		leftEncoder.reset();				
+		leftEncoder.reset();	
 	}	
 
 	/**
@@ -178,26 +177,25 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
-		double degreesTurn = clawEncoder.get();
-		SmartDashboard.putNumber("claw encoder degrees", degreesTurn);
 		SmartDashboard.putString("Autonomous", "Teleop");
 		SmartDashboard.putBoolean("limit lift top",limitSwitchLiftTop.get());
-		SmartDashboard.putBoolean("limit lift bottom", limitSwitchLiftBottom.get());		
+		SmartDashboard.putBoolean("limit lift bottom", limitSwitchLiftBottom.get());
+		SmartDashboard.putBoolean("limit lift claw", limitSwitchClaw.get());
 		rightEncoder.reset();
 		leftEncoder.reset();
 		double LP = driveJoystick.getRawAxis(LEFT_AXIS);
 		double RP = driveJoystick.getRawAxis(RIGHT_AXIS);
 
-		if (driveJoystick.getRawAxis(RIGHT_TRIGGER_ID) > minJoystickValue) {
+		if (driveJoystick.getRawAxis(RIGHT_TRIGGER_ID) > 0) {
 			//if (!limitSwitchBottom.get()) {
 				lowerClaw(CLAW_RAISE_LOWER_SPEED);
 			//}
 			SmartDashboard.putString("Right Trigger", "Pressed");
 		} else {
-
 			SmartDashboard.putString("Right Trigger", "Not Pressed");
+			lowerClaw(0);
 		}
-		if (driveJoystick.getRawAxis(LEFT_TRIGGER_ID) > minJoystickValue) {
+		if (driveJoystick.getRawAxis(LEFT_TRIGGER_ID) > 0) {
 
 			SmartDashboard.putString("Left Trigger", "Pressed");
 			// Send negative scissor lift speed to lower scissor lift
@@ -210,41 +208,37 @@ public class Robot extends IterativeRobot {
 			SmartDashboard.putString("Left Trigger", "Not Pressed");
 		}
 		if (driveJoystick.getRawButton(RIGHT_BUMPER_ID)) {
-			//if (!limitSwitchTop.get()) {
-				raiseClaw(CLAW_RAISE_LOWER_SPEED);
-			//}
-
+			raiseClaw(CLAW_RAISE_LOWER_SPEED);
 			SmartDashboard.putString("Right Bumper", "Pressed");
 		} else {
-
 			SmartDashboard.putString("Right Bumper", "Not Pressed");
+			tiltClawActuator.set(0);
 		}
 		if (driveJoystick.getRawButton(LEFT_BUMPER_ID)) {
-
 			SmartDashboard.putString("Left Bumper", "Pressed");
 			if (limitSwitchLiftTop.get()) {
 				moveScissorLift(SCISSOR_LIFT_SPEED * 1);
 			}
-
-		} else {
-
+		} else {	
 			SmartDashboard.putString("Left Bumper", "Not Pressed");
 		}
 
 		if (driveJoystick.getRawButton(A_BUTTON_ID)) {
+			SmartDashboard.putString("A BUTTON", "Pressed");
+			SmartDashboard.putNumber("Open Speed", CLAW_OPEN_CLOSE_SPEED);
 			openClaw(CLAW_OPEN_CLOSE_SPEED);
-			SmartDashboard.putString("A BUTTON ", "Pressed");
-		} else {
-
-			SmartDashboard.putString("A BUTTON", "Not Pressed");
-		}
-		if (driveJoystick.getRawButton(B_BUTTON_ID)) {
+		} 
+		
+		else if (driveJoystick.getRawButton(B_BUTTON_ID) && limitSwitchClaw.get()) {
 			closeClaw(CLAW_OPEN_CLOSE_SPEED);
 			SmartDashboard.putString("B BUTTON", "Pressed");
 		} else {
-
 			SmartDashboard.putString("B BUTTON", "Not Pressed");
+			clawActuator.set(0);
+			SmartDashboard.putString("A BUTTON", "Not Pressed");
+			SmartDashboard.putNumber("Open Speed", 0);
 		}
+		
 		if (Math.abs(RP) < minimumSpeed) {
 			RP = 0;
 
@@ -293,19 +287,19 @@ public class Robot extends IterativeRobot {
 	}
 
 	public void openClaw(double speed) {
-		setMotorSpeed(clawActuator, speed);
+		clawActuator.set(speed);
 	}
 
 	public void closeClaw(double speed) {
-		setMotorSpeed(clawActuator, -1 * speed);
+		clawActuator.set(speed * -1);
 	}
 
 	public void raiseClaw(double speed) {
-		setMotorSpeed(tiltClawActuator, speed);
+		tiltClawActuator.set(speed);
 	}
 
 	public void lowerClaw(double speed) {
-		setMotorSpeed(tiltClawActuator, -1 * speed);
+		tiltClawActuator.set(speed * -1);
 	}
 }
 
