@@ -35,11 +35,11 @@ public class Robot extends IterativeRobot {
 	private static final int RIGHT_TRIGGER_ID = 3;
 	private static final int X_BUTTON_ID = 3;
 	private static final int Y_BUTTON_ID = 4;
-	private static final double CLAW_OPEN_CLOSE_SPEED = 0.25;
+	private static final double CLAW_OPEN_CLOSE_SPEED = 0.4;
 	private static final double SCISSOR_LIFT_SPEED = .7;
 	private static final double SCISSOR_LIFT_MAX = 1000;
 	private static final double SCISSOR_LIFT_OFFSET = 10;
-	private static final double CLAW_RAISE_LOWER_SPEED = 0.25;
+	private static final double CLAW_RAISE_LOWER_SPEED = 0.4;
 	
 	Talon leftMotor0 = new Talon(0);
 	Talon leftMotor1 = new Talon(1);
@@ -50,11 +50,13 @@ public class Robot extends IterativeRobot {
 	Victor tiltClawActuator = new Victor(6);
 	Talon clawActuator = new Talon(7);
 	
-	DigitalInput limitSwitchLiftTop = new DigitalInput(6);
+	//DigitalInput limitSwitchLiftTop = new DigitalInput(6);
 	DigitalInput limitSwitchLiftBottom = new DigitalInput(7);
-	DigitalInput limitSwitchClaw = new DigitalInput(4);
+	DigitalInput limitSwitchClawOpen = new DigitalInput(4);
+	DigitalInput limitSwitchClawClose = new DigitalInput(6);
 	
 	Joystick driveJoystick = new Joystick(0);
+	Joystick clawJoystick = new Joystick(1);
 	SpeedControllerGroup m_left = new SpeedControllerGroup(leftMotor0, leftMotor1);
 	SpeedControllerGroup m_right = new SpeedControllerGroup(rightMotor0, rightMotor1);
 	DifferentialDrive drive = new DifferentialDrive(m_left, m_right);
@@ -178,60 +180,53 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		SmartDashboard.putString("Autonomous", "Teleop");
-		SmartDashboard.putBoolean("limit lift top",limitSwitchLiftTop.get());
+		//SmartDashboard.putBoolean("limit lift top",limitSwitchLiftTop.get());
 		SmartDashboard.putBoolean("limit lift bottom", limitSwitchLiftBottom.get());
-		SmartDashboard.putBoolean("limit lift claw", limitSwitchClaw.get());
+		SmartDashboard.putBoolean("limit lift claw open", limitSwitchClawOpen.get());
+		SmartDashboard.putBoolean("limit lift claw close", limitSwitchClawClose.get());
 		rightEncoder.reset();
 		leftEncoder.reset();
 		double LP = driveJoystick.getRawAxis(LEFT_AXIS);
 		double RP = driveJoystick.getRawAxis(RIGHT_AXIS);
 
-		if (driveJoystick.getRawAxis(RIGHT_TRIGGER_ID) > 0) {
-			//if (!limitSwitchBottom.get()) {
-				lowerClaw(CLAW_RAISE_LOWER_SPEED);
-			//}
+		if (clawJoystick.getRawAxis(RIGHT_TRIGGER_ID) > 0) {
+			lowerClaw(CLAW_RAISE_LOWER_SPEED);
 			SmartDashboard.putString("Right Trigger", "Pressed");
+		} else if (clawJoystick.getRawButton(RIGHT_BUMPER_ID)) {
+			raiseClaw(CLAW_RAISE_LOWER_SPEED);
+			SmartDashboard.putString("Right Bumper", "Pressed");
 		} else {
 			SmartDashboard.putString("Right Trigger", "Not Pressed");
-			lowerClaw(0);
+			tiltClawActuator.set(0);
 		}
+		
 		if (driveJoystick.getRawAxis(LEFT_TRIGGER_ID) > 0) {
-
 			SmartDashboard.putString("Left Trigger", "Pressed");
 			// Send negative scissor lift speed to lower scissor lift
-
 			if (limitSwitchLiftBottom.get()) {
 				moveScissorLift(SCISSOR_LIFT_SPEED * -1);
 			}
 		} else {
-
 			SmartDashboard.putString("Left Trigger", "Not Pressed");
 		}
-		if (driveJoystick.getRawButton(RIGHT_BUMPER_ID)) {
-			raiseClaw(CLAW_RAISE_LOWER_SPEED);
-			SmartDashboard.putString("Right Bumper", "Pressed");
-		} else {
-			SmartDashboard.putString("Right Bumper", "Not Pressed");
-			tiltClawActuator.set(0);
-		}
+		
 		if (driveJoystick.getRawButton(LEFT_BUMPER_ID)) {
 			SmartDashboard.putString("Left Bumper", "Pressed");
-			if (limitSwitchLiftTop.get()) {
+			//if (limitSwitchLiftTop.get()) {
 				moveScissorLift(SCISSOR_LIFT_SPEED * 1);
-			}
+			//}
 		} else {	
 			SmartDashboard.putString("Left Bumper", "Not Pressed");
 		}
 
-		if (driveJoystick.getRawButton(A_BUTTON_ID)) {
+		if (clawJoystick.getRawButton(A_BUTTON_ID) && limitSwitchClawOpen.get()) {
 			SmartDashboard.putString("A BUTTON", "Pressed");
 			SmartDashboard.putNumber("Open Speed", CLAW_OPEN_CLOSE_SPEED);
 			openClaw(CLAW_OPEN_CLOSE_SPEED);
-		} 
-		
-		else if (driveJoystick.getRawButton(B_BUTTON_ID) && limitSwitchClaw.get()) {
-			closeClaw(CLAW_OPEN_CLOSE_SPEED);
+		} 		
+		else if (clawJoystick.getRawButton(B_BUTTON_ID) && limitSwitchClawClose.get()) {
 			SmartDashboard.putString("B BUTTON", "Pressed");
+			closeClaw(CLAW_OPEN_CLOSE_SPEED);
 		} else {
 			SmartDashboard.putString("B BUTTON", "Not Pressed");
 			clawActuator.set(0);
@@ -247,9 +242,9 @@ public class Robot extends IterativeRobot {
 			}
 		}
 
-		if (driveJoystick.getRawButton(Y_BUTTON_ID)) {
-			speedAdjust = halfSpeed;
-		}
+//		//if (driveJoystick.getRawButton(Y_BUTTON_ID)) {
+//			speedAdjust = halfSpeed;
+//		}
 
 		setRobotDriveSpeed(-RP * speedAdjust, -LP * speedAdjust);
 
