@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -35,11 +36,12 @@ public class Robot extends IterativeRobot {
 	private static final int RIGHT_TRIGGER_ID = 3;
 	private static final int X_BUTTON_ID = 3;
 	private static final int Y_BUTTON_ID = 4;
-	private static final double CLAW_OPEN_CLOSE_SPEED = 0.4;
+	private static final double CLAW_OPEN_CLOSE_SPEED = 0.6;
 	private static final double SCISSOR_LIFT_SPEED = .7;
 	private static final double SCISSOR_LIFT_MAX = 1000;
 	private static final double SCISSOR_LIFT_OFFSET = 10;
-	private static final double CLAW_RAISE_LOWER_SPEED = 0.4;
+	private static final double CLAW_RAISE_LOWER_SPEED = 0.6;
+	private static final String gameData = "LLL";
 	
 	Talon leftMotor0 = new Talon(0);
 	Talon leftMotor1 = new Talon(1);
@@ -65,6 +67,7 @@ public class Robot extends IterativeRobot {
 
 	Encoder rightEncoder = new Encoder(2, 3, false, EncodingType.k4X);
 	Encoder leftEncoder = new Encoder(0, 1, false, EncodingType.k4X);
+	SendableChooser<Character> autoChooser = new SendableChooser<Character>();
 	
 	CameraServer camera;
 	int session;	
@@ -82,14 +85,15 @@ public class Robot extends IterativeRobot {
 	static final int fullSpeed = 1;
 	static final double motorExpiration = .2;
 	static final double autonomousDistance = 11;
-	static final double autonomousSpeed = .4;
+	static final double autonomousSpeed = .6;
+	static final double autonomousMultiplier = .9;
 	static final double retrogradeSpeed = -.2;
 	double speedAdjust = .8;
 
 	// Defining which panels are exactly where on the field.
-	PanelDirection homeSwitchDirection;
-	PanelDirection opponentSwitchDirection;
-	PanelDirection middleScaleDirection;
+	char homeSwitchDirection;
+	char opponentSwitchDirection;
+	char middleScaleDirection;
 
 	/**
 	 * This function is run when the robot is first started up and should be used
@@ -113,6 +117,10 @@ public class Robot extends IterativeRobot {
 
 		rightEncoder.reset();
 		leftEncoder.reset();	
+		autoChooser.addDefault("left", 'L');
+		autoChooser.addObject("Center", 'C');
+		autoChooser.addObject("Right", 'R');
+		SmartDashboard.putData("Direction Chooser", autoChooser);
 	}	
 
 	/**
@@ -120,27 +128,12 @@ public class Robot extends IterativeRobot {
 	 */
 	public void autonomousinit() {
 		SmartDashboard.putString("Autonomous", "Init");
-		String gameData = DriverStation.getInstance().getGameSpecificMessage();
-		if (gameData.charAt(0) == 'L') {
-			// TODO: Define buttons to control scissor lift actuator and finish autonomous
-			// code
-			// ((Object) leftScissorliftActuator).whenPressed (new Lift());
-			// rightScissorliftActuator.whenPressed(new Lift());
-
-			homeSwitchDirection = PanelDirection.Left;
-		} else {
-			homeSwitchDirection = PanelDirection.Right;
-		}
-		if (gameData.charAt(1) == 'L') {
-			middleScaleDirection = PanelDirection.Left;
-		} else {
-			middleScaleDirection = PanelDirection.Right;
-		}
-		if (gameData.charAt(2) == 'L') {
-			opponentSwitchDirection = PanelDirection.Left;
-		} else {
-			opponentSwitchDirection = PanelDirection.Right;
-		}
+		//String gameData = DriverStation.getInstance().getGameSpecificMessage();
+		
+		homeSwitchDirection = gameData.charAt(0);
+		middleScaleDirection = gameData.charAt(1);
+		opponentSwitchDirection = gameData.charAt(2);
+		
 		rightEncoder.reset();
 		leftEncoder.reset();
 	}
@@ -166,10 +159,15 @@ public class Robot extends IterativeRobot {
 			SmartDashboard.putString("Autonomous", "Stop");
             drive.tankDrive(retrogradeSpeed, retrogradeSpeed);
             drive.tankDrive(0, 0);
-			//drive.stopMotor();
+            if (homeSwitchDirection == autoChooser.getSelected()) {
+            	lowerClaw(CLAW_RAISE_LOWER_SPEED);
+            	if (!limitSwitchLiftBottom.get()) {
+            		openClaw(CLAW_OPEN_CLOSE_SPEED);
+            	}       
+            }
 		}
 		else {
-			setRobotDriveSpeed(autonomousSpeed, autonomousSpeed);
+			setRobotDriveSpeed(autonomousSpeed * autonomousMultiplier, autonomousSpeed);
 			SmartDashboard.putString("Autonomous", "Go");
 		}
 	}
@@ -296,8 +294,4 @@ public class Robot extends IterativeRobot {
 	public void lowerClaw(double speed) {
 		tiltClawActuator.set(speed * -1);
 	}
-}
-
-enum PanelDirection {
-	Right, Left
 }
