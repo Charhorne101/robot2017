@@ -1,4 +1,7 @@
 package org.usfirst.frc.team5679.robot;
+import java.time.Duration;
+import java.time.Instant;
+
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -41,7 +44,7 @@ public class Robot extends IterativeRobot {
 	private static final double SCISSOR_LIFT_MAX = 1000;
 	private static final double SCISSOR_LIFT_OFFSET = 10;
 	private static final double CLAW_RAISE_LOWER_SPEED = 0.6;
-	private static final String gameData = "LLL";
+	private static final Duration AUTONOMOUS_CLAW_SECONDS = Duration.ofSeconds(2);
 	
 	Talon leftMotor0 = new Talon(0);
 	Talon leftMotor1 = new Talon(1);
@@ -53,7 +56,7 @@ public class Robot extends IterativeRobot {
 	Talon clawActuator = new Talon(7);
 	
 	//DigitalInput limitSwitchLiftTop = new DigitalInput(6);
-	DigitalInput limitSwitchLiftBottom = new DigitalInput(7);
+	DigitalInput limitSwitchClawLower = new DigitalInput(7);
 	DigitalInput limitSwitchClawOpen = new DigitalInput(4);
 	DigitalInput limitSwitchClawClose = new DigitalInput(6);
 	
@@ -71,7 +74,9 @@ public class Robot extends IterativeRobot {
 	
 	CameraServer camera;
 	int session;	
-
+	String gameData;
+	Instant starts;
+	
 	static final double wheelCircumference = 1.43;
 	static final double encoderPulses = 250;
 	static final double distancePerPulse = wheelCircumference / encoderPulses;
@@ -84,9 +89,9 @@ public class Robot extends IterativeRobot {
 	static final double minimumSpeed = 0.1;
 	static final int fullSpeed = 1;
 	static final double motorExpiration = .2;
-	static final double autonomousDistance = 11;
+	static final double autonomousDistance = 5;
 	static final double autonomousSpeed = .6;
-	static final double autonomousMultiplier = .9;
+	static final double autonomousMultiplier = .95;
 	static final double retrogradeSpeed = -.2;
 	double speedAdjust = .8;
 
@@ -102,6 +107,20 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		SmartDashboard.putString("Autonomous", "Robot Init");
+		CameraServer.getInstance().startAutomaticCapture();
+		gameData = DriverStation.getInstance().getGameSpecificMessage().trim();
+		
+		if (!gameData.isEmpty()) {
+			homeSwitchDirection = gameData.charAt(0);
+			middleScaleDirection = gameData.charAt(1);
+			opponentSwitchDirection = gameData.charAt(2);
+		}
+		
+		SmartDashboard.putString("gameData", gameData);
+		SmartDashboard.putString("homeSwitchDirection", homeSwitchDirection + "");
+		SmartDashboard.putString("middleScaleDirection", middleScaleDirection + "");
+		SmartDashboard.putString("opponentSwitchDirection", opponentSwitchDirection + "");
+		
 		leftMotor0.setExpiration(motorExpiration);
 		leftMotor1.setExpiration(motorExpiration);
 		rightMotor0.setExpiration(motorExpiration);
@@ -128,11 +147,6 @@ public class Robot extends IterativeRobot {
 	 */
 	public void autonomousinit() {
 		SmartDashboard.putString("Autonomous", "Init");
-		//String gameData = DriverStation.getInstance().getGameSpecificMessage();
-		
-		homeSwitchDirection = gameData.charAt(0);
-		middleScaleDirection = gameData.charAt(1);
-		opponentSwitchDirection = gameData.charAt(2);
 		
 		rightEncoder.reset();
 		leftEncoder.reset();
@@ -155,19 +169,29 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
 		debug();
 				
-		if (Math.abs(rightEncoder.getDistance()) >= autonomousDistance || Math.abs(leftEncoder.getDistance()) >= autonomousDistance) {
+		if (Math.abs(rightEncoder.getDistance()) >= autonomousDistance || 
+				Math.abs(leftEncoder.getDistance()) >= autonomousDistance) {
 			SmartDashboard.putString("Autonomous", "Stop");
             drive.tankDrive(retrogradeSpeed, retrogradeSpeed);
             drive.tankDrive(0, 0);
-            if (homeSwitchDirection == autoChooser.getSelected()) {
-            	lowerClaw(CLAW_RAISE_LOWER_SPEED);
-            	if (!limitSwitchLiftBottom.get()) {
-            		openClaw(CLAW_OPEN_CLOSE_SPEED);
+            if (homeSwitchDirection == autoChooser.getSelected()) { 
+        		if (null == starts) {
+        			starts = Instant.now();
+        		}
+        		Instant ends = Instant.now();
+        		if (Duration.between(starts, ends).compareTo(AUTONOMOUS_CLAW_SECONDS) < 0) {
+            		lowerClaw(CLAW_RAISE_LOWER_SPEED);
+            	}
+            	else {
+            		tiltClawActuator.set(0);
+            		if (limitSwitchClawOpen.get()) {
+                		openClaw(CLAW_OPEN_CLOSE_SPEED);            			
+            		} 
             	}       
             }
 		}
 		else {
-			setRobotDriveSpeed(autonomousSpeed * autonomousMultiplier, autonomousSpeed);
+			setRobotDriveSpeed(autonomousSpeed, autonomousSpeed * autonomousMultiplier);
 			SmartDashboard.putString("Autonomous", "Go");
 		}
 	}
@@ -178,8 +202,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		SmartDashboard.putString("Autonomous", "Teleop");
-		//SmartDashboard.putBoolean("limit lift top",limitSwitchLiftTop.get());
-		SmartDashboard.putBoolean("limit lift bottom", limitSwitchLiftBottom.get());
+		SmartDashboard.putBoolean("limit lift bottom", limitSwitchClawLower.get());
 		SmartDashboard.putBoolean("limit lift claw open", limitSwitchClawOpen.get());
 		SmartDashboard.putBoolean("limit lift claw close", limitSwitchClawClose.get());
 		rightEncoder.reset();
@@ -201,7 +224,7 @@ public class Robot extends IterativeRobot {
 		if (driveJoystick.getRawAxis(LEFT_TRIGGER_ID) > 0) {
 			SmartDashboard.putString("Left Trigger", "Pressed");
 			// Send negative scissor lift speed to lower scissor lift
-			if (limitSwitchLiftBottom.get()) {
+			if (limitSwitchClawLower.get()) {
 				moveScissorLift(SCISSOR_LIFT_SPEED * -1);
 			}
 		} else {
@@ -239,10 +262,6 @@ public class Robot extends IterativeRobot {
 				LP = 0;
 			}
 		}
-
-//		//if (driveJoystick.getRawButton(Y_BUTTON_ID)) {
-//			speedAdjust = halfSpeed;
-//		}
 
 		setRobotDriveSpeed(-RP * speedAdjust, -LP * speedAdjust);
 
