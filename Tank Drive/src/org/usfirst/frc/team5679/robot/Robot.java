@@ -108,6 +108,7 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		SmartDashboard.putString("Autonomous", "Robot Init");
 		CameraServer.getInstance().startAutomaticCapture();
+		starts = null;
 		gameData = DriverStation.getInstance().getGameSpecificMessage().trim();
 		
 		if (!gameData.isEmpty()) {
@@ -147,6 +148,7 @@ public class Robot extends IterativeRobot {
 	 */
 	public void autonomousinit() {
 		SmartDashboard.putString("Autonomous", "Init");
+		starts = null;
 		gameData = DriverStation.getInstance().getGameSpecificMessage().trim();
 		
 		if (!gameData.isEmpty()) {
