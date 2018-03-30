@@ -147,6 +147,15 @@ public class Robot extends IterativeRobot {
 	 */
 	public void autonomousinit() {
 		SmartDashboard.putString("Autonomous", "Init");
+		gameData = DriverStation.getInstance().getGameSpecificMessage().trim();
+		
+		if (!gameData.isEmpty()) {
+			homeSwitchDirection = gameData.charAt(0);
+			middleScaleDirection = gameData.charAt(1);
+			opponentSwitchDirection = gameData.charAt(2);
+		}
+		
+		SmartDashboard.putString("gameData", gameData);
 		
 		rightEncoder.reset();
 		leftEncoder.reset();
