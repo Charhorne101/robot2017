@@ -89,7 +89,6 @@ public class Robot extends IterativeRobot {
 	static final double minimumSpeed = 0.1;
 	static final int fullSpeed = 1;
 	static final double motorExpiration = .2;
-	static final double autonomousDistance = 5;
 	static final double autonomousSpeed = .6;
 	static final double autonomousMultiplier = .95;
 	static final double retrogradeSpeed = -.2;
@@ -108,7 +107,7 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		SmartDashboard.putString("Autonomous", "Robot Init");
 		CameraServer.getInstance().startAutomaticCapture();
-		starts = null;
+		starts = Instant.now();
 		gameData = DriverStation.getInstance().getGameSpecificMessage().trim();
 		
 		if (!gameData.isEmpty()) {
@@ -148,9 +147,8 @@ public class Robot extends IterativeRobot {
 	 */
 	public void autonomousinit() {
 		SmartDashboard.putString("Autonomous", "Init");
-		starts = null;
 		gameData = DriverStation.getInstance().getGameSpecificMessage().trim();
-		
+		starts = null; 
 		if (!gameData.isEmpty()) {
 			homeSwitchDirection = gameData.charAt(0);
 			middleScaleDirection = gameData.charAt(1);
@@ -179,18 +177,17 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousPeriodic() {
 		debug();
-				
+		
 		if (Math.abs(rightEncoder.getDistance()) >= autonomousDistance || 
-				Math.abs(leftEncoder.getDistance()) >= autonomousDistance) {
+			Math.abs(leftEncoder.getDistance()) >= autonomousDistance) {
 			SmartDashboard.putString("Autonomous", "Stop");
             drive.tankDrive(retrogradeSpeed, retrogradeSpeed);
             drive.tankDrive(0, 0);
             if (homeSwitchDirection == autoChooser.getSelected()) { 
-        		if (null == starts) {
-        			starts = Instant.now();
-        		}
         		Instant ends = Instant.now();
-        		if (Duration.between(starts, ends).compareTo(AUTONOMOUS_CLAW_SECONDS) < 0) {
+        		SmartDashboard.putNumber("Autonomous end timer", starts.getNano() / 1000);
+        		Duration clawDuration = Duration.between(starts, ends);        			
+        		if (clawDuration.compareTo(AUTONOMOUS_CLAW_SECONDS) <= 0) {
             		lowerClaw(CLAW_RAISE_LOWER_SPEED);
             	}
             	else {
@@ -204,7 +201,23 @@ public class Robot extends IterativeRobot {
 		else {
 			setRobotDriveSpeed(autonomousSpeed, autonomousSpeed * autonomousMultiplier);
 			SmartDashboard.putString("Autonomous", "Go");
+			starts = Instant.now();
 		}
+		
+		SmartDashboard.putNumber("Autonomous start timer", starts.getNano() / 1000);
+		
+	}
+	
+	public void disabledPeriodic() {
+		gameData = DriverStation.getInstance().getGameSpecificMessage().trim();
+		
+		if (!gameData.isEmpty()) {
+			homeSwitchDirection = gameData.charAt(0);
+			middleScaleDirection = gameData.charAt(1);
+			opponentSwitchDirection = gameData.charAt(2);
+		}
+		
+		SmartDashboard.putString("gameData", gameData);
 	}
 	
 	/**
@@ -221,7 +234,7 @@ public class Robot extends IterativeRobot {
 		double LP = driveJoystick.getRawAxis(LEFT_AXIS);
 		double RP = driveJoystick.getRawAxis(RIGHT_AXIS);
 
-		if (clawJoystick.getRawAxis(RIGHT_TRIGGER_ID) > 0) {
+		if (clawJoystick.getRawButton(LEFT_BUMPER_ID)) {
 			lowerClaw(CLAW_RAISE_LOWER_SPEED);
 			SmartDashboard.putString("Right Trigger", "Pressed");
 		} else if (clawJoystick.getRawButton(RIGHT_BUMPER_ID)) {
